@@ -1,0 +1,18 @@
+# Matlab related file #
+#######################
+*.mat
+*.asv
+
+# Output file #
+###############
+*.out
+*.o.*
+*.log
+*.err
+*.ps
+
+# Image file #
+##############
+*.png
+*.jpg
+*.bmp
