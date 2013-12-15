@@ -18,10 +18,10 @@ end
 %   model - classification model
 global conf imdb;
 
-conf.lite = false;                        % lite version for debug
+conf.lite = true;                        % lite version for debug
 
 conf.dataset = 'CUB11';                  % dataset name
-conf.prefix  = 'seg-fv-all';               % name prefix for all output
+conf.prefix  = 'pre-seg-fv';               % name prefix for all output
 conf.isLRFlip = false;                   % enable left-right flip
 conf.isStandImg = true;                  % standarize max size < 300
                                           % !!! conflict with seg mask !!
@@ -57,7 +57,6 @@ end
 %-----------------------------------------------
 % model paramters
 %-----------------------------------------------
-
 conf.svm.C = 10;
 conf.svm.kernel = 'linear';
 
@@ -76,7 +75,7 @@ conf.encoderPath = fullfile(conf.outDir, [conf.prefix '-encoder.mat']);
 conf.modelPath = fullfile(conf.outDir, [conf.prefix '-model.mat']);
 conf.resultPath = fullfile(conf.outDir, [conf.prefix '-result.mat']);
 % final features
-conf.featPath = fullfile(conf.outDir, [conf.prefix '-feat.mat']);
+conf.featPath = fullfile(conf.outDir, [conf.prefix '-prekernel.mat']);
 
 
 fprintf( 1, '\n ... Done\n' );
