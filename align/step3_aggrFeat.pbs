@@ -1,0 +1,11 @@
+# qSub setting
+# FV step3 aggregate all feature files
+#$ -cwd
+#$ -N FV_step3
+#$ -j y
+#$ -r y
+#$ -o qsub/step3.out
+#$ -hold_jid "FV_step2*"
+# run matlab code
+cd ~/zk_fgc/src/align
+matlab2013 -nodesktop -nosplash -r "step3_aggrFeat(60);exit"

@@ -1,0 +1,10 @@
+# qSub setting
+# FV step1 train encoder
+#$ -cwd
+#$ -N FV_step1 
+#$ -j y
+#$ -r y
+#$ -o qsub/step1.out
+# run matlab code
+cd ~/zk_fgc/src/align
+matlab2013 -nodesktop -nosplash -r "step1_trainEncoder;exit;"

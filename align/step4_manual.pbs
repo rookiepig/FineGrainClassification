@@ -1,0 +1,11 @@
+# qSub setting
+# FV step4 manual assign task and hostname 
+#$ -cwd
+#$ -N FV_step4_manual
+#$ -j y
+#$ -r y
+#$ -o qsub/
+#$ -hold_jid "FV_step3"
+# run matlab code
+cd ~/zk_fgc/src/align
+matlab2013 -nodesktop -nosplash -r "step4_train($myID,10);exit"

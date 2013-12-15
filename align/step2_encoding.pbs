@@ -1,0 +1,12 @@
+# qSub setting
+# FV step2 encoding all images (1-60 split)
+#$ -cwd
+#$ -t 1-60
+#$ -N FV_step2_$TASK_ID
+#$ -j y
+#$ -r y
+#$ -o qsub/step2_$TASK_ID.out
+#$ -hold_jid "FV_step1"
+# run matlab code
+cd ~/zk_fgc/src/align
+matlab2013 -nodesktop -nosplash -r "step2_encoding($SGE_TASK_ID,$SGE_TASK_LAST);exit"
