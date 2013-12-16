@@ -16,3 +16,7 @@
 *.png
 *.jpg
 *.bmp
+
+# PBS script #
+##############
+*.pbs
