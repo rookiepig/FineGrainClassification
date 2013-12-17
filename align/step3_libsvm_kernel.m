@@ -28,37 +28,51 @@ setupCUB11;
 if( exist( conf.featPath, 'file' ) )
     fprintf( '\n\t precompute kernel file exist: %s', conf.featPath );
 else
-    descrs = cell( 1, numel( imdb.imgName ) );
     ttImgNum = numel( imdb.imgName );
+    kernelAll = zeros( ttImgNum, ttImgNum );
     jobSz = floor( ttImgNum / conf.jobNum );
-    for jobID = 1 : conf.jobNum
-        if( exist( conf.descrsPath{ jobID }, 'file' ) )
-            fprintf( '\n\t Load descrs: %s (%.2f %%)\n', ... 
-                conf.descrsPath{ jobID }, 100 * jobID / conf.jobNum  );
+    for rowID = 1 : conf.jobNum
+        if( exist( conf.descrsPath{ rowID }, 'file' ) )
+            fprintf( '\n\t row descrs: %s (%.2f %%)\n', ... 
+                conf.descrsPath{ rowID }, 100 * rowID / conf.jobNum  );
             % load current job des
-            load( conf.descrsPath{ jobID } );
+            load( conf.descrsPath{ rowID } );
             
-            jobSt = ( jobID - 1 ) * jobSz + 1;
-            if( jobID == conf.jobNum )
-                jobEd = ttImgNum;
+            rowSt = ( rowID - 1 ) * jobSz + 1;
+            if( rowID == conf.jobNum )
+                rowEd = ttImgNum;
             else
-                jobEd = jobID * jobSz;
+                rowEd = rowID * jobSz;
             end
+            rowDes = cat( 2, jobDes{ : } );
             
-            descrs( 1, jobSt : jobEd ) = jobDes;
-            % remove temp descrs files
-            clear jobDes;
+            for colID = 1 : conf.jobNum
+                if( exist( conf.descrsPath{ colID }, 'file' ) )
+                    fprintf( '\n\t\t col descrs: %s (%.2f %%)\n', ... 
+                        conf.descrsPath{ colID }, 100 * colID / conf.jobNum  );
+                    % load current job des
+                    load( conf.descrsPath{ colID } );
+
+                    colSt = ( colID - 1 ) * jobSz + 1;
+                    if( colID == conf.jobNum )
+                        colEd = ttImgNum;
+                    else
+                        colEd = colID * jobSz;
+                    end
+                    colDes = cat( 2, jobDes{ : } );
+                    % block matrix multiply
+                    kernelAll( rowSt : rowEd, colSt : colEd ) = ...
+                        rowDes' * colDes;
+                else
+                    fprintf( 2, 'Error: descrs file %s does not exist\n', ... 
+                        conf.descrsPath{ colID } );
+                end
+            end
         else
             fprintf( 2, 'Error: descrs file %s does not exist\n', ... 
-                conf.descrsPath{ jobID } );
+                conf.descrsPath{ rowID } );
         end
     end
-    % use sparse matrxi to save memory
-    descrs =  cat( 2, descrs{ : } );
-    % fprintf( '\n\t descrs sparseness: %.2f %%', ...
-    %     100 * length( find( abs( descrs ) > 1e-6 ) ) / numel( descrs ) );
-    
-    size( descrs )
     
     % compute kernel matrix
     selTrain = ( imdb.ttSplit == 1 );
@@ -66,17 +80,11 @@ else
     numTrain = sum( selTrain );
     numTest = sum( selTest );
     kernelTrain = [ ( 1 : numTrain )', ...
-        descrs( : , selTrain )' * descrs( : , selTrain ) ];
+        kernelAll( selTrain, selTrain ) ];
     kernelTest = [ ( 1 : numTest )', ...
-        descrs( : , selTest )' * descrs( : , selTrain ) ];
+        kernelAll( selTest, selTrain ) ];
     save( conf.featPath, 'kernelTrain', 'kernelTest'  );
-    
-    % remvoe temp descrs file
-    for jobID = 1 : conf.jobNum
-        if( exist( conf.descrsPath{ jobID }, 'file' ) )
-            delete( conf.descrsPath{ jobID } );
-        end
-    end
+
 end
 
 fprintf( '\n ...Done Step3: Aggregate Features and Compute Kernel time: %.2f (s)',  toc );
