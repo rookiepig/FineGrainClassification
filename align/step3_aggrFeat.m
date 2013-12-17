@@ -46,20 +46,26 @@ else
             end
             
             descrs( 1, jobSt : jobEd ) = jobDes;
-            % remove temp descrs files
             clear jobDes;
-            delete( conf.descrsPath{ jobID } );
+            
         else
             fprintf( 2, 'Error: descrs file %s does not exist\n', ... 
                 conf.descrsPath{ jobID } );
             exit;
         end
     end
-    % use sparse matrxi to save memory
+    % use sparse matrix to save memory
     descrs =  cat( 2, descrs{ : } );
     % fprintf( '\n\t descrs sparseness: %.2f %%', ...
     %     100 * length( find( abs( descrs ) > 1e-6 ) ) / numel( descrs ) );
     save( conf.featPath, 'descrs', '-v7.3'  );
+
+    % delete temp descrs files
+    for jobID = 1 : conf.jobNum
+        if( exist( conf.descrsPath{ jobID }, 'file' ) )
+            delete( conf.descrsPath{ jobID } );
+        end
+    end
 end
 
 fprintf( '\n ...Done Step3: Aggregate Features time: %.2f (s)',  toc );

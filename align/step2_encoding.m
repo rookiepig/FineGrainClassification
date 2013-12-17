@@ -43,7 +43,7 @@ if exist( conf.encoderPath, 'file' )
     fprintf( '\n Encoding job images, jobID: %03d ...\n', jobID );
     
     % encoding current job images
-    if( ~exist( conf.descrsPath{ jobID } ) )
+    if( ~exist( conf.descrsPath{ jobID }, 'file' ) )
 
         jobDes = cell( 1, ( jobEd - jobSt ) + 1 );
         for ii = jobSt : jobEd

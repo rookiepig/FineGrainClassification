@@ -109,17 +109,16 @@ for c = 1 : numClasses
     fprintf('\n\t class %s AP %.2f; AP 11 %.2f\n', imdb.clsName{ c }, ...
         ap( c ) * 100, ap11( c ) * 100 ) ;
 end
-scores = cat(1,scores{:}) ;
 
 fprintf( '\n ... Done\n' );
 
 fprintf( '\n Step5: testing time: %.2f (s)', toc );
 
-
 %% Step 5: save results and figures
 fprintf( '\n Saving results and figures ...\n' );
 
-% confusion matrix (can be computed only if each image has only one label)
+% confusion matrix
+scores = cat(1,scores{:}) ;
 [~,preds] = max(scores, [], 1) ;
 confusion = zeros(numClasses) ;
 for c = 1 : numClasses

@@ -48,28 +48,35 @@ else
             descrs( 1, jobSt : jobEd ) = jobDes;
             % remove temp descrs files
             clear jobDes;
-            delete( conf.descrsPath{ jobID } );
         else
             fprintf( 2, 'Error: descrs file %s does not exist\n', ... 
                 conf.descrsPath{ jobID } );
-            exit;
         end
     end
     % use sparse matrxi to save memory
     descrs =  cat( 2, descrs{ : } );
     % fprintf( '\n\t descrs sparseness: %.2f %%', ...
     %     100 * length( find( abs( descrs ) > 1e-6 ) ) / numel( descrs ) );
-
+    
+    size( descrs )
+    
     % compute kernel matrix
-    selTrain = find( imdb.ttSplit == 1 );
-    selTest = find( imdb.ttSplit == 0 );
-    numTrain = length( selTrain );
-    numTest = length( selTest) );
+    selTrain = ( imdb.ttSplit == 1 );
+    selTest =  ( imdb.ttSplit == 0 );
+    numTrain = sum( selTrain );
+    numTest = sum( selTest );
     kernelTrain = [ ( 1 : numTrain )', ...
-        descrs( selTrain, : ) * descrs( selTrain, : )' ];
+        descrs( : , selTrain )' * descrs( : , selTrain ) ];
     kernelTest = [ ( 1 : numTest )', ...
-        descrs( selTest, : ) * descrs( selTrain, : )' ];
+        descrs( : , selTest )' * descrs( : , selTrain ) ];
     save( conf.featPath, 'kernelTrain', 'kernelTest'  );
+    
+    % remvoe temp descrs file
+    for jobID = 1 : conf.jobNum
+        if( exist( conf.descrsPath{ jobID }, 'file' ) )
+            delete( conf.descrsPath{ jobID } );
+        end
+    end
 end
 
 fprintf( '\n ...Done Step3: Aggregate Features and Compute Kernel time: %.2f (s)',  toc );
