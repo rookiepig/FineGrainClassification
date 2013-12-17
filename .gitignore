@@ -20,3 +20,10 @@
 # PBS script #
 ##############
 *.pbs
+
+# data folder #
+###############
+align/data/12_10_bad_align-fv/
+align/data/12_11_good_bdbox_bovw/
+align/data/12_12_good_bdbox_fv/
+bow/data/
