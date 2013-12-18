@@ -9,6 +9,7 @@ fprintf( 1, '\n Init Configuration Paramters ... \n' );
 if ( strcmp( computer(), 'GLNXA64' ) ) 
     % run vl_setup explicitly on Linux platform
     run( '~/vlfeat/toolbox/vl_setup' );
+    addpath( '~/libsvm/matlab/' );
 end
 
 % declare global variable
@@ -18,10 +19,10 @@ end
 %   model - classification model
 global conf imdb;
 
-conf.lite = true;                        % lite version for debug
+conf.lite = false;                        % lite version for debug
 
 conf.dataset = 'CUB11';                  % dataset name
-conf.prefix  = 'pre-seg-fv';               % name prefix for all output
+conf.prefix  = 'pre-seg-fv-all';               % name prefix for all output
 conf.isLRFlip = false;                   % enable left-right flip
 conf.isStandImg = true;                  % standarize max size < 300
                                           % !!! conflict with seg mask !!
@@ -74,8 +75,8 @@ conf.imdbPath = fullfile(conf.outDir, [conf.dataset '-imdb.mat']);
 conf.encoderPath = fullfile(conf.outDir, [conf.prefix '-encoder.mat']);
 conf.modelPath = fullfile(conf.outDir, [conf.prefix '-model.mat']);
 conf.resultPath = fullfile(conf.outDir, [conf.prefix '-result.mat']);
-% final features
-conf.featPath = fullfile(conf.outDir, [conf.prefix '-prekernel.mat']);
+% precompute kernel
+conf.kernelPath = fullfile(conf.outDir, [conf.prefix '-kernel.mat']);
 
 
 fprintf( 1, '\n ... Done\n' );

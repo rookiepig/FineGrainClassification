@@ -14,11 +14,12 @@ fprintf( '\n Step2: Encoding images ...\n' );
 % init  configuration
 initConf;
 % temporary encoding files
+conf.cacheDir = 'cache';                  % cache dir for temp files
 conf.jobNum = JOB_NUM;                         % parallel jobs for encoding
-conf.descrsPath = cell( 1, conf.jobNum );
+conf.tmpDescrsPath = cell( 1, conf.jobNum );
 for ii = 1 : conf.jobNum
-    tempFn = sprintf( '-descrs%03d.mat', ii );
-    conf.descrsPath{ ii } = fullfile( conf.outDir, [conf.prefix tempFn] );
+    tempFn = sprintf( '-tmpDescrs%03d.mat', ii );
+    conf.tmpDescrsPath{ ii } = fullfile( conf.cacheDir, [conf.prefix tempFn] );
 end
 
 % setup dataset
@@ -40,14 +41,15 @@ if exist( conf.encoderPath, 'file' )
     fprintf( '\n Get encoder from: %s\n', conf.encoderPath );
 	encoder = load( conf.encoderPath ) ;
     
-    fprintf( '\n Encoding job images, jobID: %03d ...\n', jobID );
+    fprintf( '\n\t Encoding job: %03d (%.2f %%)...\n', jobID, ...
+        100 * jobID / conf.jobNum );
     
     % encoding current job images
-    if( ~exist( conf.descrsPath{ jobID }, 'file' ) )
+    if( ~exist( conf.tmpDescrsPath{ jobID }, 'file' ) )
 
         jobDes = cell( 1, ( jobEd - jobSt ) + 1 );
         for ii = jobSt : jobEd
-            fprintf( '\n\t encoding %s (%.2f %%)', imdb.imgName{ ii }, ...
+            fprintf( '\n\t encoding image %s (%.2f %%)', imdb.imgName{ ii }, ...
                 100 * ii / numel( imdb.imgName ) );
             if( conf.useSegMask )
                 jobDes{ ii - jobSt + 1 } = EncodeImg( encoder, ...
@@ -62,13 +64,13 @@ if exist( conf.encoderPath, 'file' )
         end
 
         % save job des
-        save( conf.descrsPath{ jobID }, 'jobDes' );
+        save( conf.tmpDescrsPath{ jobID }, 'jobDes' );
     end
     fprintf( '\n ... Done\n' );
     
 else
     % must train encoder first
-    fprintf( 2, 'Error: encoder file: %s does not exist\n', conf.encoderPath );
+    fprintf( 2, '\n Error: encoder file: %s does not exist\n', conf.encoderPath );
 end
 
-fprintf( '\n ...Done Step2: Encoding job: %03d, time: %.2f (s)', jobID, toc );
+fprintf( '\n ...Done Encoding job: %03d, time: %.2f (s)', jobID, toc );

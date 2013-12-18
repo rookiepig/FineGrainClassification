@@ -1,57 +1,64 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % File: step3_libsvm_kernel.m
-% Desc: aggregate different encoding results and compute kernel map
+% Desc: compute different kernel maps
 % Author: Zhang Kang
 % Date: 2013/12/15
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function step3_libsvm_kernel( JOB_NUM )
+function step3_libsvm_kernel( jobID, JOB_NUM )
 
 % Step3: aggregate features
 tic;
-fprintf( '\n Step3: Aggregate Features and Compute Kernel...\n' );
-
+fprintf( '\n Step3: Precompute Kernel...\n' );
 
 % initial all configuration
 initConf;
 % temporary encoding files
-conf.jobNum = JOB_NUM;                         % parallel jobs for encoding
-conf.descrsPath = cell( 1, conf.jobNum );
+conf.cacheDir = 'cache';                  % cache dir for temp files
+conf.jobNum = JOB_NUM;                         
 for ii = 1 : conf.jobNum
-    tempFn = sprintf( '-descrs%03d.mat', ii );
-    conf.descrsPath{ ii } = fullfile( conf.outDir, [conf.prefix tempFn] );
+    tempFn = sprintf( '-tmpDescrs%03d.mat', ii );
+    conf.tmpDescrsPath{ ii } = fullfile( conf.cacheDir, [conf.prefix tempFn] );
 end
+
+conf.tmpKernelPath = cell( 1, conf.jobNum );
+for ii = 1 : conf.jobNum
+    tempFn = sprintf( '-tmpKernel%03d.mat', ii );
+    conf.tmpKernelPath{ ii } = fullfile( conf.cacheDir, [conf.prefix tempFn] );
+end
+
 
 % setup dataset
 setupCUB11;
 
 % load econded features
-if( exist( conf.featPath, 'file' ) )
-    fprintf( '\n\t precompute kernel file exist: %s', conf.featPath );
-else
-    ttImgNum = numel( imdb.imgName );
-    kernelAll = zeros( ttImgNum, ttImgNum );
-    jobSz = floor( ttImgNum / conf.jobNum );
-    for rowID = 1 : conf.jobNum
-        if( exist( conf.descrsPath{ rowID }, 'file' ) )
-            fprintf( '\n\t row descrs: %s (%.2f %%)\n', ... 
-                conf.descrsPath{ rowID }, 100 * rowID / conf.jobNum  );
+if( ~exist( conf.kernelPath, 'file' )  ) % kernel file not exist
+
+    if( exist( conf.tmpDescrsPath{ jobID }, 'file' ) ) % descrs file exist
+
+        if( ~exist( conf.tmpKernelPath{ jobID }, 'file' ) )
+            fprintf( '\n\t Kernel job: %03d (%.2f %%) ... \n', ... 
+                jobID, 100 * jobID / conf.jobNum  );
             % load current job des
-            load( conf.descrsPath{ rowID } );
-            
-            rowSt = ( rowID - 1 ) * jobSz + 1;
-            if( rowID == conf.jobNum )
+            load( conf.tmpDescrsPath{ jobID } );
+            rowDes = cat( 2, jobDes{ : } );
+
+            ttImgNum = numel( imdb.imgName );
+            jobSz = floor( ttImgNum / conf.jobNum );    
+            rowSt = ( jobID - 1 ) * jobSz + 1;
+            if( jobID == conf.jobNum )
                 rowEd = ttImgNum;
             else
-                rowEd = rowID * jobSz;
+                rowEd = jobID * jobSz;
             end
-            rowDes = cat( 2, jobDes{ : } );
+            jobKernel = zeros( rowEd - rowSt + 1, ttImgNum );
             
+            % compute precomputed kernel
             for colID = 1 : conf.jobNum
-                if( exist( conf.descrsPath{ colID }, 'file' ) )
-                    fprintf( '\n\t\t col descrs: %s (%.2f %%)\n', ... 
-                        conf.descrsPath{ colID }, 100 * colID / conf.jobNum  );
+                if( exist( conf.tmpDescrsPath{ colID }, 'file' ) )
+                    fprintf( '\n\t\t load col descrs: %s (%.2f %%)\n', ... 
+                        conf.tmpDescrsPath{ colID }, 100 * colID / conf.jobNum  );
                     % load current job des
-                    load( conf.descrsPath{ colID } );
+                    load( conf.tmpDescrsPath{ colID } );
 
                     colSt = ( colID - 1 ) * jobSz + 1;
                     if( colID == conf.jobNum )
@@ -61,30 +68,22 @@ else
                     end
                     colDes = cat( 2, jobDes{ : } );
                     % block matrix multiply
-                    kernelAll( rowSt : rowEd, colSt : colEd ) = ...
+                    jobKernel( :, colSt : colEd ) = ...
                         rowDes' * colDes;
                 else
-                    fprintf( 2, 'Error: descrs file %s does not exist\n', ... 
-                        conf.descrsPath{ colID } );
+                    fprintf( 2, '\n\t\t Error: col file %s does not exist\n', ... 
+                        conf.tmpDescrsPath{ colID } );
                 end
             end
-        else
-            fprintf( 2, 'Error: descrs file %s does not exist\n', ... 
-                conf.descrsPath{ rowID } );
+
+            % save job kernel
+            save( conf.tmpKernelPath{ jobID }, 'jobKernel' );
         end
+    else
+        fprintf( 2, '\n\t Error: row file %s does not exist\n', ... 
+            conf.tmpDescrsPath{ jobID } );
     end
-    
-    % compute kernel matrix
-    selTrain = ( imdb.ttSplit == 1 );
-    selTest =  ( imdb.ttSplit == 0 );
-    numTrain = sum( selTrain );
-    numTest = sum( selTest );
-    kernelTrain = [ ( 1 : numTrain )', ...
-        kernelAll( selTrain, selTrain ) ];
-    kernelTest = [ ( 1 : numTest )', ...
-        kernelAll( selTest, selTrain ) ];
-    save( conf.featPath, 'kernelTrain', 'kernelTest'  );
 
 end
 
-fprintf( '\n ...Done Step3: Aggregate Features and Compute Kernel time: %.2f (s)',  toc );
+fprintf( '\n ...Done Kernel job: %03d, time: %.2f (s)', jobID, toc );

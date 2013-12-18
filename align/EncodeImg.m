@@ -28,22 +28,28 @@ imgSz = size( img );
 if( conf.useSegMask )
 	mask = encoder.readImgFunc( maskFn, curBox );
     maskType = conf.maskType;
-    feat = cell( 1, numel( maskType ) );
+    feat = cell( 1, numel( maskType ) + 1 );
     if( length( find( mask > 0 ) ) > 0.125 * size( mask, 1 ) * size( mask, 2 ) )
         % seg mask occupy > 1/8 area
         for ii = 1 : numel( maskType )
             curMask = ( abs( mask - maskType( ii ) ) <= 1e-4 );
-            feat{ ii } = EncodeFeat( encoder, encoder.getFeatFunc( img, curMask ), imgSz );
+            feat{ ii } = EncodeFeat( encoder, ...
+                encoder.getFeatFunc( img, curMask ), imgSz );
         end
     else
-        % seg mask too small use whole bounding box
+        % seg mask too small use whole bounding box 4 times
         fprintf( '\n\t Warning: seg mask too small' );
         for ii = 1 : numel( maskType ) 
             % use the whole bounding box
-            feat{ ii } = EncodeFeat( encoder, encoder.getFeatFunc( img ), imgSz );
+            feat{ ii } = EncodeFeat( encoder, ...
+                encoder.getFeatFunc( img ), imgSz );
         end
     end
+    % add bounding box as another feature
+    feat{ numel( maskType ) + 1 } = EncodeFeat( encoder, ...
+        encoder.getFeatFunc( img ), imgSz );
 else
+    % no seg mask just bounding box feature
 	feat{ 1 } = EncodeFeat( encoder, encoder.getFeatFunc( img ), imgSz );
 end
 

@@ -15,11 +15,9 @@ initConf;
 % setup dataset
 setupCUB11;
 
-
 if exist( conf.encoderPath, 'file' )
 	% load existing encoder
     fprintf( '\n No need to train encoder (file: %s)\n', conf.encoderPath );
-	encoder = load( conf.encoderPath ) ;
 else
 	numTrain = 5000 ;    % training images for encoding
 	if( conf.lite )
@@ -45,5 +43,4 @@ else
 end
 
 % record time
-fprintf( '\n ... Done Step1: Train Encoder time: %.2f (s)', toc );
-
+fprintf( '\n ... Done Train Encoder time: %.2f (s)\n', toc );
