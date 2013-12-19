@@ -26,7 +26,7 @@ if ~exist( conf.imdbPath, 'file' )
     clsName = clsName( :, 2 );
     imgName = imgName( :, 2 );
     ttSplit = ttSplit( :, 2 );
-	if( conf.useSegMask )
+    if( conf.useSegMask )
 		% add mask file name
 		maskName = cell( numel( imgName ), 1 );
 		for imIdx = 1 : numel( imgName )
@@ -52,16 +52,16 @@ if ~exist( conf.imdbPath, 'file' )
 		for ii = 1 : numel( selTrain )
 			imgFn = imgName{ selTrain( ii ) };
 			curBox = bdBox( selTrain( ii ), : );
-		    k = strfind( imgFn, '.jpg' );
-		    flipFn = sprintf( '%s_f.png', imgFn( 1 : k ) );
-		    newImgName{ ii } = flipFn;
-	        flipBox = curBox;
-		    flipBox( 1 ) = imgSize( selTrain( ii ), 1 ) - ...
-		         ( curBox( 1 ) + curBox( 3 ) );
-		    newBdBox( ii, : ) = flipBox;
-		    if( conf.useSegMask )
-			    flipMaskFn = sprintf( '%s_f_m.png', imgFn( 1 : k ) );
-			    newMaskName{ ii } = flipMaskFn;
+			k = strfind( imgFn, '.jpg' );
+			flipFn = sprintf( '%s_f.png', imgFn( 1 : k ) );
+			newImgName{ ii } = flipFn;
+			flipBox = curBox;
+			flipBox( 1 ) = imgSize( selTrain( ii ), 1 ) - ...
+			( curBox( 1 ) + curBox( 3 ) );
+			newBdBox( ii, : ) = flipBox;
+			if( conf.useSegMask )
+				flipMaskFn = sprintf( '%s_f_m.png', imgFn( 1 : k ) );
+				newMaskName{ ii } = flipMaskFn;
 			end
 		end
 		imgName = [ imgName; newImgName ];
@@ -82,18 +82,18 @@ if ~exist( conf.imdbPath, 'file' )
 
 	% handle lite version (preserve first 20 class)
 	if( conf.lite )
-		imdb.clsName = clsName( 1 : 20 );
-		for c = 1 : 20
+		imdb.clsName = clsName( 1 : 5 );
+		for c = 1 : 5
 			sel{ c } = find( imdb.clsLabel == c );
 		end
 		sel = cat( 1, sel{ : } );
-			imdb.bdBox = bdBox( sel, : );
-			imdb.clsLabel = clsLabel( sel );
-			imdb.imgName = imgName( sel );
-			imdb.ttSplit = ttSplit( sel );
-			if( conf.useSegMask ) 
-				imdb.maskName = maskName( sel );
-			end
+		imdb.bdBox = bdBox( sel, : );
+		imdb.clsLabel = clsLabel( sel );
+		imdb.imgName = imgName( sel );
+		imdb.ttSplit = ttSplit( sel );
+		if( conf.useSegMask ) 
+			imdb.maskName = maskName( sel );
+		end
 	end
 	% save imdb var
 	save( conf.imdbPath, 'imdb' );

@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Step1: train encoder
-tic;
+clear;tic;
 fprintf( '\n Step1: Train Encoder ...\n' );
 
 % initial all configuration
@@ -26,7 +26,7 @@ else
 	end
 	encSelTrain = vl_colsubset( transpose( find( imdb.ttSplit == 1 ) ), ...
 		numTrain, 'uniform' ) ;
-	if( conf.useSegMask )
+    if( conf.useSegMask )
 	  	% use boudingbox + segment mask
 	  	encoder = TrainEncoder( ...
             fullfile( imdb.imgDir, imdb.imgName( encSelTrain ) ), ...

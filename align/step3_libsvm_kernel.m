@@ -7,7 +7,7 @@
 function step3_libsvm_kernel( jobID, JOB_NUM )
 
 % Step3: aggregate features
-tic;
+clear;tic;
 fprintf( '\n Step3: Precompute Kernel...\n' );
 
 % initial all configuration

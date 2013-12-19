@@ -21,15 +21,18 @@ global conf imdb;
 
 conf.lite = false;                        % lite version for debug
 
-conf.dataset = 'CUB11';                  % dataset name
-conf.prefix  = 'pre-seg-fv-all';               % name prefix for all output
-conf.isLRFlip = false;                   % enable left-right flip
-conf.isStandImg = true;                  % standarize max size < 300
+conf.dataset = '-CUB11';                  % dataset name
+conf.prefix  = 'seg-fv-clr';                 % name prefix for all output
+if( conf.lite ) 
+  conf.prefix = [ conf.prefix '-lite' ];
+end
+conf.isLRFlip = true;                   % enable left-right flip
+conf.isStandImg = true;                  % standarize max size < 500
                                           % !!! conflict with seg mask !!
                                           % to handle seg mask 
                                           % use nearest neigbour inter
 if( conf.isStandImg )
-	conf.maxImgSz = 300;
+	conf.maxImgSz = 500;
 end
 
 conf.useBoundingBox = true;               % enable crop of bounding box
@@ -41,12 +44,13 @@ conf.useSegMask = true;                   % enable segment mask
 conf.encoderParam = { 'type', 'fv', ...
   'numWords', 256, ...
   'layouts', {'1x1'}, ...    % spatial pyramid layouts
-  'numPcaDimensions', 192, ...            % PCA dimenssion PCA FLAG
-  'whitening', true, ...                  % PCA whiten PCA FLAG
+  'numPcaDimensions', 64, ...            % PCA dimenssion PCA FLAG
+  'whitening', false, ...                  % PCA whiten PCA FLAG
   'whiteningRegul', 0.01, ...              % PCA whiten + regularize
   'renormalize', true, ...                % PCA l2 renormalize
   'seed', 1
   };                                       % encoder paramter
+conf.featDimPerChannel = 128;              % if use multiple channel
 conf.featParam = { 'Sizes' [ 4 6 8 10 ], ...
   'Step', 3, ... 
   'Color', 'opponent', ...
@@ -71,7 +75,7 @@ vl_twister('state',conf.randSeed) ;
 % path paramters
 %-----------------------------------------------
 conf.outDir  = 'data';                    % output direcotry and files
-conf.imdbPath = fullfile(conf.outDir, [conf.dataset '-imdb.mat']);
+conf.imdbPath = fullfile(conf.outDir, [ conf.prefix conf.dataset '-imdb.mat']);
 conf.encoderPath = fullfile(conf.outDir, [conf.prefix '-encoder.mat']);
 conf.modelPath = fullfile(conf.outDir, [conf.prefix '-model.mat']);
 conf.resultPath = fullfile(conf.outDir, [conf.prefix '-result.mat']);

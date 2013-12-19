@@ -123,32 +123,54 @@ end
 descrs = cat( 2, descrs{ : } );
 
 %% Step 1 (optional): learn PCA projection
-if opts.numPcaDimensions < inf || opts.whitening
-  fprintf('%s: learning PCA rotation/projection\n', mfilename) ;
-  encoder.projectionCenter = mean( descrs, 2 ) ;
-  x = bsxfun( @minus, descrs, encoder.projectionCenter ) ;
-  X = x*x' / size(x,2) ;
-  [V,D] = eig(X) ;
-  d = diag(D) ;
-  [d,perm] = sort(d,'descend') ;
-  d = d + opts.whiteningRegul * max(d) ;
-  m = min(opts.numPcaDimensions, size(descrs,1)) ;
-  V = V(:,perm) ;
-  if opts.whitening
-    encoder.projection = diag(1./sqrt(d(1:m))) * V(:,1:m)' ;
+dimension = size( descrs, 1 ) ;
+% each channel has its own PCA
+dimPerCh = conf.featDimPerChannel;
+siftNum = floor( dimension / dimPerCh );
+fprintf('\n %s: PCA num %d\n', mfilename, siftNum ) ;
+encoder.pcaNum = siftNum;
+
+for sn = 1 : siftNum  
+  if opts.numPcaDimensions < inf || opts.whitening
+    fprintf('\n\t%s: learning PCA rotation/projection %d\n', ...
+      mfilename, sn ) ;
+    desSt = ( sn - 1 ) * dimPerCh + 1;
+    desEd = sn * dimPerCh;
+    curDescrs = descrs( desSt : desEd, : );
+    encoder.projectionCenter{ sn } = mean( curDescrs, 2 ) ;
+    x = bsxfun( @minus, curDescrs, encoder.projectionCenter{ sn } ) ;
+    X = x*x' / size(x,2) ;
+    [V,D] = eig(X) ;
+    d = diag(D) ;
+    [d,perm] = sort(d,'descend') ;
+    d = d + opts.whiteningRegul * max(d) ;
+    m = min(opts.numPcaDimensions, size(curDescrs,1)) ;
+    V = V(:,perm) ;
+    if opts.whitening
+      encoder.projection{ sn } = diag(1./sqrt(d(1:m))) * V(:,1:m)' ;
+    else
+      encoder.projection{ sn } = V(:,1:m)' ;
+    end
+    clear X V D d ;
   else
-    encoder.projection = V(:,1:m)' ;
+    encoder.projection{ sn } = 1 ;
+    encoder.projectionCenter{ sn } = 0 ;
   end
-  clear X V D d ;
-else
-  encoder.projection = 1 ;
-  encoder.projectionCenter = 0 ;
-end
-descrs = encoder.projection * bsxfun(@minus, descrs, encoder.projectionCenter) ;
-if encoder.renormalize
-  descrs = bsxfun(@times, descrs, 1./max(1e-12, sqrt(sum(descrs.^2)))) ;
 end
 
+% project descrs using PCA
+for pn = 1 : encoder.pcaNum
+  desSt = ( pn - 1 ) * dimPerCh + 1;
+  desEd = pn * dimPerCh;
+  curDescrs = descrs( desSt : desEd, : );
+  curDescrs = encoder.projection{ pn } * ...
+    bsxfun(@minus, curDescrs, encoder.projectionCenter{ pn } ) ;
+  if encoder.renormalize
+    curDescrs = bsxfun(@times, curDescrs, 1./max(1e-12, sqrt(sum(curDescrs.^2)))) ;
+  end
+  tmpDescrs{ pn } = curDescrs;
+end
+descrs = cat( 1, tmpDescrs{ : } );
 
 %% Step 2 (optional): geometrically augment the features
 % add image coordinates as features
