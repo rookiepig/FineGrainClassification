@@ -6,10 +6,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf( 1, '\n Init Configuration Paramters ... \n' );
 
-if ( strcmp( computer(), 'GLNXA64' ) ) 
-    % run vl_setup explicitly on Linux platform
-    run( '~/vlfeat/toolbox/vl_setup' );
-    addpath( '~/libsvm/matlab/' );
+if ( strcmp( computer(), 'GLNXA64' ) )
+  % run vl_setup explicitly on Linux platform
+  run( '~/vlfeat/toolbox/vl_setup' );
+  addpath( '~/libsvm/matlab/' );
 end
 
 % declare global variable
@@ -23,16 +23,16 @@ conf.lite = false;                        % lite version for debug
 
 conf.dataset = '-CUB11';                  % dataset name
 conf.prefix  = 'seg-fv-clr';                 % name prefix for all output
-if( conf.lite ) 
+if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
 conf.isLRFlip = true;                   % enable left-right flip
 conf.isStandImg = true;                  % standarize max size < 500
-                                          % !!! conflict with seg mask !!
-                                          % to handle seg mask 
-                                          % use nearest neigbour inter
+% !!! conflict with seg mask !!
+% to handle seg mask
+% use nearest neigbour inter
 if( conf.isStandImg )
-	conf.maxImgSz = 500;
+  conf.maxImgSz = 500;
 end
 
 conf.useBoundingBox = true;               % enable crop of bounding box
@@ -52,10 +52,10 @@ conf.encoderParam = { 'type', 'fv', ...
   };                                       % encoder paramter
 conf.featDimPerChannel = 128;              % if use multiple channel
 conf.featParam = { 'Sizes' [ 4 6 8 10 ], ...
-  'Step', 3, ... 
+  'Step', 3, ...
   'Color', 'opponent', ...
   'FloatDescriptors', true };
-                                          % PHOW paramter
+% PHOW paramter
 if( conf.useSegMask )
   conf.maskType = [ 64 / 255, 128 / 255, 192 / 255, 255 / 255 ];
 end

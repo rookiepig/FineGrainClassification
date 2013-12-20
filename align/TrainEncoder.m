@@ -7,12 +7,12 @@ fprintf( 1, '\n Train Encoder ... \n' );
 global conf imdb;
 
 if ( nargin == 2 )
-	% 1 paramter --> bounding box list
-	boxList = varargin{ 1 };
+  % 1 paramter --> bounding box list
+  boxList = varargin{ 1 };
 elseif( nargin == 3 )
-	% 2 paramters --> bounding box + mask list
-	boxList = varargin{ 1 };
-	maskList = varargin{ 2 };
+  % 2 paramters --> bounding box + mask list
+  boxList = varargin{ 1 };
+  maskList = varargin{ 2 };
 end
 
 % default options for encoder
@@ -27,7 +27,7 @@ opts.renormalize =  true;
 opts.layouts = {'1x1'} ;
 opts.subdivisions = zeros(4,0) ;
 opts.readImgFunc = @ReadImg;
-opts.getFeatFunc = @GetFeat; 
+opts.getFeatFunc = @GetFeat;
 % set paramters use global configuration
 opts = vl_argparse( opts, conf.encoderParam ) ;
 
@@ -45,41 +45,41 @@ for i = 1:numel(opts.layouts)
   y2 = y(2:end,2:end) ;
   opts.subdivisions = cat(2, opts.subdivisions, ...
     [x1(:)' ;
-     y1(:)' ;
-     x2(:)' ;
-     y2(:)'] ) ;
+    y1(:)' ;
+    x2(:)' ;
+    y2(:)'] ) ;
 end
 
 % default visual word
 if isempty( opts.numWords )
-    switch opts.type
-      case {'bovw'}
-        opts.numWords = 1024 ;
-      case {'fv'} % fv setting follows [Gavves, ICCV13]
-        opts.numWords = 256 ;
-        opts.numPcaDimensions = 64;
-      case {'vlad'}
-        opts.numWords = 64 ;
-        opts.numPcaDimensions = 100 ;
-        opts.whitening = true ;
-        opts.whiteninRegul = 0.01 ;
-      otherwise
-        assert(false) ;
-    end
+  switch opts.type
+    case {'bovw'}
+      opts.numWords = 1024 ;
+    case {'fv'} % fv setting follows [Gavves, ICCV13]
+      opts.numWords = 256 ;
+      opts.numPcaDimensions = 64;
+    case {'vlad'}
+      opts.numWords = 64 ;
+      opts.numPcaDimensions = 100 ;
+      opts.whitening = true ;
+      opts.whiteninRegul = 0.01 ;
+    otherwise
+      assert(false) ;
+  end
 end
 
 if isempty(opts.numSamplesPerWord)
-    switch opts.type
-      case {'bovw'}
-        opts.numSamplesPerWord = 200;
-      case {'vlad','fv'}
-        opts.numSamplesPerWord = 1000;
-      otherwise
-        assert(false) ;
-    end
-    if conf.lite
-      opts.numSamplesPerWord = 20;
-    end
+  switch opts.type
+    case {'bovw'}
+      opts.numSamplesPerWord = 200;
+    case {'vlad','fv'}
+      opts.numSamplesPerWord = 1000;
+    otherwise
+      assert(false) ;
+  end
+  if conf.lite
+    opts.numSamplesPerWord = 20;
+  end
 end
 
 % show final options and save to encoder
@@ -100,24 +100,24 @@ numDescrsPerImage = ceil(opts.numWords * opts.numSamplesPerWord / numImages) ;
 descrs = cell( 1, numImages );
 for ii = 1 : numImages
   fprintf('\n\t%s: reading: %s (%.2f %%)', mfilename,  imgList{ ii }, ...
-      100 * ii / numImages ) ;
+    100 * ii / numImages ) ;
   if( conf.useBoundingBox )
-  	img = encoder.readImgFunc(  imgList { ii }, boxList( ii, : ) ) ;
+    img = encoder.readImgFunc(  imgList { ii }, boxList( ii, : ) ) ;
   else
-  	img = encoder.readImgFunc(  imgList { ii } ) ;
+    img = encoder.readImgFunc(  imgList { ii } ) ;
   end
   if( conf.useSegMask )
-  	% treat each part equally
-	mask = encoder.readImgFunc( maskList{ ii }, boxList( ii, : ) );
-  	features = encoder.getFeatFunc( img, mask ) ;
+    % treat each part equally
+    mask = encoder.readImgFunc( maskList{ ii }, boxList( ii, : ) );
+    features = encoder.getFeatFunc( img, mask ) ;
   else
-  	features = encoder.getFeatFunc( img );
+    features = encoder.getFeatFunc( img );
   end
   % sampling
   randn( 'state', 0 );
   rand( 'state', 0 );
   sel = vl_colsubset( 1 : size( features.descr, 2 ), ...
-  	single( numDescrsPerImage ) );
+    single( numDescrsPerImage ) );
   descrs{ ii } = features.descr( :, sel );
 end
 descrs = cat( 2, descrs{ : } );
@@ -130,7 +130,7 @@ siftNum = floor( dimension / dimPerCh );
 fprintf('\n %s: PCA num %d\n', mfilename, siftNum ) ;
 encoder.pcaNum = siftNum;
 
-for sn = 1 : siftNum  
+for sn = 1 : siftNum
   if opts.numPcaDimensions < inf || opts.whitening
     fprintf('\n\t%s: learning PCA rotation/projection %d\n', ...
       mfilename, sn ) ;
@@ -188,26 +188,26 @@ switch encoder.type
     vl_twister('state', opts.seed) ;
     encoder.words = vl_kmeans(descrs, opts.numWords, 'verbose', 'algorithm', 'elkan') ;
     encoder.kdtree = vl_kdtreebuild(encoder.words, 'numTrees', 2) ;
-
+    
   case {'fv'} ;
     vl_twister('state', opts.seed) ;
     if 1
-        
+      
       v = var(descrs')' ;
       if( conf.lite )
-          % for debug output v and descrs
-          save( fullfile( conf.outDir, ... 
-            [ conf.prefix, 'gmmDescrs.mat'] ), 'descrs' );
-          save( fullfile( conf.outDir, ...
-            [ conf.prefix,'gmmVar.mat' ] ), 'v' );
+        % for debug output v and descrs
+        save( fullfile( conf.outDir, ...
+          [ conf.prefix, 'gmmDescrs.mat'] ), 'descrs' );
+        save( fullfile( conf.outDir, ...
+          [ conf.prefix,'gmmVar.mat' ] ), 'v' );
       end
       % vl_feat gmm
       [encoder.means, encoder.covariances, encoder.priors] = ...
-          vl_gmm(descrs, opts.numWords, 'verbose', ...
-                 'Initialization', 'kmeans', ...
-                 'CovarianceBound', double(max(v)*0.0001), ...
-                 'NumRepetitions', 1) ;
-          
+        vl_gmm(descrs, opts.numWords, 'verbose', ...
+        'Initialization', 'kmeans', ...
+        'CovarianceBound', double(max(v)*0.0001), ...
+        'NumRepetitions', 1) ;
+      
       % try matlab gmm
       % gmOpt = statset('Display','iter');
       % gmObj = gmdistribution.fit( descrs', opts.numWords, ...
@@ -216,11 +216,11 @@ switch encoder.type
       %     'Options', gmOpt );
       % encoder.means = gmObj.mu';
       % encoder.covariances = reshape( gmObj.Sigma, dimension, opts.numWords );
-      % encoder.priors = single( gmObj.PComponents' );    
+      % encoder.priors = single( gmObj.PComponents' );
     else
       addpath lib/yael/matlab
       [a,b,c] = ...
-          yael_gmm(descrs, opts.numWords, 'verbose', 2) ;
+        yael_gmm(descrs, opts.numWords, 'verbose', 2) ;
       encoder.priors = single(a) ;
       encoder.means = single(b) ;
       encoder.covariances = single(c) ;
