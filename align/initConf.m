@@ -15,24 +15,23 @@ end
 % declare global variable
 %   conf - configuration paramters
 %   imdb - image database
-%   encoder - feature encoder
-%   model - classification model
+
 global conf imdb;
 
 conf.lite = false;                        % lite version for debug
 
-conf.dataset = '-CUB11';                  % dataset name
-conf.prefix  = 'seg-fv-clr';                 % name prefix for all output
+conf.dataset = 'STDog';                  % dataset name
+conf.prefix  = 'seg-fv-clr-300-bdbox';                 % name prefix for all output
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
 conf.isLRFlip = true;                   % enable left-right flip
-conf.isStandImg = true;                  % standarize max size < 500
+conf.isStandImg = true;                  % standarize max size < 300
 % !!! conflict with seg mask !!
 % to handle seg mask
 % use nearest neigbour inter
 if( conf.isStandImg )
-  conf.maxImgSz = 500;
+  conf.maxImgSz = 300;
 end
 
 conf.useBoundingBox = true;               % enable crop of bounding box
@@ -74,8 +73,8 @@ vl_twister('state',conf.randSeed) ;
 %-----------------------------------------------
 % path paramters
 %-----------------------------------------------
-conf.outDir  = 'data';                    % output direcotry and files
-conf.imdbPath = fullfile(conf.outDir, [ conf.prefix conf.dataset '-imdb.mat']);
+conf.outDir  = [ 'data/'  conf.dataset ];                    % output direcotry and files
+conf.imdbPath = fullfile(conf.outDir, [ conf.prefix '-imdb.mat']);
 conf.encoderPath = fullfile(conf.outDir, [conf.prefix '-encoder.mat']);
 conf.modelPath = fullfile(conf.outDir, [conf.prefix '-model.mat']);
 conf.resultPath = fullfile(conf.outDir, [conf.prefix '-result.mat']);

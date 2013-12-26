@@ -14,7 +14,7 @@ fprintf( '\n Step4: Aggregate Precomputed Kernel...\n' );
 % initial all configuration
 initConf;
 % temporary encoding files
-conf.cacheDir = 'cache';                  % cache dir for temp files
+conf.cacheDir = [ 'cache/' conf.dataset ];            % cache dir for temp files
 conf.jobNum = JOB_NUM;
 conf.tmpKernelPath = cell( 1, conf.jobNum );
 for ii = 1 : conf.jobNum
@@ -23,7 +23,13 @@ for ii = 1 : conf.jobNum
 end
 
 % setup dataset
-setupCUB11;
+switch conf.dataset
+  case {'CUB11'}
+    setupCUB11;
+  case {'STDog'}
+    setupSTDog;
+end
+
 
 % load econded features
 if( exist( conf.kernelPath, 'file' ) )
@@ -60,7 +66,7 @@ else
     kernelAll( selTrain, selTrain ) ];
   kernelTest = [ ( 1 : numTest )', ...
     kernelAll( selTest, selTrain ) ];
-  save( conf.kernelPath, 'kernelTrain', 'kernelTest'  );
+  save( conf.kernelPath, 'kernelTrain', 'kernelTest', '-v7.3'  );
 end
 
 fprintf( '\n ...Done Aggregate Precomputed Kernel time: %.2f (s)',  toc );

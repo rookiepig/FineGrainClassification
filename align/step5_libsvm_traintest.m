@@ -14,7 +14,12 @@ fprintf( '\n Step5: Training and Testing ...\n' );
 initConf;
 
 % setup dataset
-setupCUB11;
+switch conf.dataset
+  case {'CUB11'}
+    setupCUB11;
+  case {'STDog'}
+    setupSTDog;
+end
 
 
 % load precomputed kernel

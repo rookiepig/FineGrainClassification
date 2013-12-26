@@ -18,14 +18,14 @@ if ~exist( conf.imdbPath, 'file' )
   % -- imgName  : M * 1 cell vector, image file name
   % -- imgSize  : M * 2 matrix, image size [ wid hei ]
   % -- ttSplit  : M * 1 0-1 vector, 1 means training
-  imdb.imgDir = '../../in/CUB2011/images';
-  load( fullfile( '../../in/CUB2011/', 'cub2011.mat' ) );
+  imdb.imgDir = '../../in/CUB11/images';
+  load( fullfile( '../../in/CUB11/', 'cub2011.mat' ) );
   % remove the ID column of each data
-  bdBox = bdBox( :, 2 : 5 );
+  bdBox    = bdBox( :, 2 : 5 );
   clsLabel = clsLabel( :, 2 );
-  clsName = clsName( :, 2 );
-  imgName = imgName( :, 2 );
-  ttSplit = ttSplit( :, 2 );
+  clsName  = clsName( :, 2 );
+  imgName  = imgName( :, 2 );
+  ttSplit  = ttSplit( :, 2 );
   if( conf.useSegMask )
     % add mask file name
     maskName = cell( numel( imgName ), 1 );
@@ -41,7 +41,7 @@ if ~exist( conf.imdbPath, 'file' )
     % enable left right flip
     % enlarge training data, test data remains unchanged
     selTrain = ( find( ttSplit == 1 ) );
-    ttSplit = [ ttSplit; ttSplit( selTrain ) ];
+    ttSplit  = [ ttSplit; ttSplit( selTrain ) ];
     clsLabel = [ clsLabel; clsLabel( selTrain ) ];
     
     newImgName = cell( numel( selTrain ), 1 );

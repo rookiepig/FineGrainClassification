@@ -14,7 +14,7 @@ fprintf( '\n Step2: Encoding images ...\n' );
 % init  configuration
 initConf;
 % temporary encoding files
-conf.cacheDir = 'cache';                  % cache dir for temp files
+conf.cacheDir = [ 'cache/' conf.dataset ];            % cache dir for temp files
 conf.jobNum = JOB_NUM;                         % parallel jobs for encoding
 conf.tmpDescrsPath = cell( 1, conf.jobNum );
 for ii = 1 : conf.jobNum
@@ -23,7 +23,13 @@ for ii = 1 : conf.jobNum
 end
 
 % setup dataset
-setupCUB11;
+switch conf.dataset
+  case {'CUB11'}
+    setupCUB11;
+  case {'STDog'}
+    setupSTDog;
+end
+
 
 % split image according to jobID and jobNum
 ttImgNum = numel( imdb.imgName );

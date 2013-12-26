@@ -13,7 +13,12 @@ fprintf( '\n Step1: Train Encoder ...\n' );
 initConf;
 
 % setup dataset
-setupCUB11;
+switch conf.dataset
+  case {'CUB11'}
+    setupCUB11;
+  case {'STDog'}
+    setupSTDog;
+end
 
 if exist( conf.encoderPath, 'file' )
   % load existing encoder

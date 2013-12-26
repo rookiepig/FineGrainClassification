@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: step3_libsvm_kernel.m
-% Desc: compute different kernel maps
+% File: tmp_step3_kernel.m
+% Desc: compute different kernel maps just use first 4 FVs
 % Author: Zhang Kang
-% Date: 2013/12/15
+% Date: 2013/12/20
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function step3_libsvm_kernel( jobID, JOB_NUM )
+function tmp_step3_kernel( jobID, JOB_NUM )
 
 % Step3: aggregate features
 tic;
@@ -13,7 +13,7 @@ fprintf( '\n Step3: Precompute Kernel...\n' );
 % initial all configuration
 initConf;
 % temporary encoding files
-conf.cacheDir = [ 'cache/' conf.dataset ];            % cache dir for temp files
+conf.cacheDir = 'cache';                  % cache dir for temp files
 conf.jobNum = JOB_NUM;
 for ii = 1 : conf.jobNum
   tempFn = sprintf( '-tmpDescrs%03d.mat', ii );
@@ -26,14 +26,9 @@ for ii = 1 : conf.jobNum
   conf.tmpKernelPath{ ii } = fullfile( conf.cacheDir, [conf.prefix tempFn] );
 end
 
-% setup dataset
-switch conf.dataset
-  case {'CUB11'}
-    setupCUB11;
-  case {'STDog'}
-    setupSTDog;
-end
 
+% setup dataset
+setupCUB11;
 
 % load econded features
 if( ~exist( conf.kernelPath, 'file' )  ) % kernel file not exist
@@ -46,7 +41,13 @@ if( ~exist( conf.kernelPath, 'file' )  ) % kernel file not exist
       % load current job des
       load( conf.tmpDescrsPath{ jobID } );
       rowDes = cat( 2, jobDes{ : } );
-      
+      % select first 4 FVs
+      fvLen = size( rowDes, 1 );
+      fprintf( '\n\t Total FV length: %d\n', fvLen );
+      selFourFV = logical( zeros( fvLen, 1 ) );
+      selFourFV( 1 : floor( fvLen * 4 / 5 ) ) = 1;
+      rowDes = rowDes( selFourFV, : );
+
       ttImgNum = numel( imdb.imgName );
       jobSz = floor( ttImgNum / conf.jobNum );
       rowSt = ( jobID - 1 ) * jobSz + 1;
@@ -72,7 +73,7 @@ if( ~exist( conf.kernelPath, 'file' )  ) % kernel file not exist
             colEd = colID * jobSz;
           end
           colDes = cat( 2, jobDes{ : } );
-          clear jobDes; % save memory
+          colDes = colDes( selFourFV, : );
           % block matrix multiply
           jobKernel( :, colSt : colEd ) = ...
             rowDes' * colDes;

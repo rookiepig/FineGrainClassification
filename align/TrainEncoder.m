@@ -189,7 +189,7 @@ switch encoder.type
     encoder.words = vl_kmeans(descrs, opts.numWords, 'verbose', 'algorithm', 'elkan') ;
     encoder.kdtree = vl_kdtreebuild(encoder.words, 'numTrees', 2) ;
     
-  case {'fv'} ;
+  case {'fv'}
     vl_twister('state', opts.seed) ;
     if 1
       
