@@ -1,3 +1,5 @@
+% combine train and test kernel to one kernel
+
 load( 'imdb.mat' );
 load( 'kernel.mat' );
 

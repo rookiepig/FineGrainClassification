@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: cmp_group.m
+% File: cmp_group_global.m
 % Desc: compare group SVM and global SVM
 % Author: Zhang Kang
 % Date: 2013/12/29

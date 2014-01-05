@@ -1,62 +1,65 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: getSVMFeat.m
-% Desc: get SVM features for one group
-% Author: Zhang Kang
-% Date: 2014/01/01
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [ mapFeat ] = GetSVMFeat( conf, imdb, kernel, curGrp )
+%% GetSVMFeat
+%  Desc: get training SVM feat use n-fold cross validation
+%  In: 
+%    conf, imdb, kernel -- basic variables
+%    curGrp -- (struct) group clustering information
+%  Out:
+%    mapFeat -- (nSample * nClass) mapped SVM feature
+%%
+
+fprintf( 'function: %s\n', mfilename );
 tic;
-fprintf( '\t get mapping SVM features\n' );
 
-curModel.mapSVM = cell( 1, numClasses );
-curModel.mapFeat = zeros( numSample, numClasses );
+% init basic variables
+nSample = length( imdb.clsLabel );
+nClass  = max( imdb.clsLabel );
 
-for f = 1 : conf.foldNum
-  fprintf( '\t\t Fold: %d (%.2f %%)\n', f, 100 * f / conf.foldNum );
-  for c = 1 : grp{ g }.clusterNum
-    fprintf( '\t\t Cluster: %d (%.2f %%)\n', c, 100 * c / grp{ g }.clusterNum );
-    grpCls = grp{ g }.cluster{ c };
-    for cmpCls = grpCls
-      fprintf( '\t\t\t train test class: %d\n', cmpCls );
-      tmpTrainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
+% split 10 fold CV
+[ cvTrain, cvValid ] = SplitCVFold( conf.nFold, imdb.clsLabel, ...
+  imdb.ttSplit );
+
+mapFeat = zeros( nSample, nClass ) + conf.MAP_INIT_VAL;
+
+for f = 1 : conf.nFold
+  fprintf( '\t Fold: %d (%.2f %%)\n', f, 100 * f / conf.nFold );
+  for c = 1 : curGrp.nCluster
+    fprintf( '\t\t Cluster: %d (%.2f %%)\n', c, 100 * c / curGrp.nCluster );
+    grpCls = curGrp.cluster{ c };
+    for gC = 1 : length( grpCls )
+      cmpCls = grpCls( gC );
+      fprintf( '*.' );
+      % init train valid index
+      trainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
         cvTrain{ f } );
-      tmpValidIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
+      validIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
         cvValid{ f } );
-      if conf.isDebug
-        % debug info
-        fprintf( 'train len: %d valid len: %d\n', length( tmpTrainIdx ), length( tmpValidIdx ) );
-      end
-      grpTrainK = kernel( tmpTrainIdx, tmpTrainIdx );
-      grpValidK = kernel( tmpValidIdx , tmpTrainIdx );
 
-      grpTrainK = [ ( 1 : size( grpTrainK, 1 ) )', grpTrainK ];
-      grpValidK = [ ( 1 : size( grpValidK, 1 ) )', grpValidK ];
+      trainK = kernel( trainIdx, trainIdx );
+      validK = kernel( validIdx , trainIdx );
+
+      trainK = [ ( 1 : size( trainK, 1 ) )', trainK ];
+      validK = [ ( 1 : size( validK, 1 ) )', validK ];
 
       % train one-fold SVM
-      yTrain = 2 * ( imdb.clsLabel( tmpTrainIdx ) == cmpCls ) - 1 ;
-      yValid = 2 * ( imdb.clsLabel( tmpValidIdx ) == cmpCls ) - 1 ;
-      tmpModel = libsvmtrain( double( yTrain ), double( grpTrainK ), ...
+      yTrain = 2 * ( imdb.clsLabel( trainIdx ) == cmpCls ) - 1 ;
+      yValid = 2 * ( imdb.clsLabel( validIdx ) == cmpCls ) - 1 ;
+      tmpModel = libsvmtrain( double( yTrain ), double( trainK ), ...
         conf.orgSVMOPT ) ;
       % get valid SVM score --> map features
       if( conf.isSVMProb )
-        [gPrdCls, acc, tmpScore ] = libsvmpredict( double( yValid ), ...
-          double( grpValidK ), tmpModel, '-b 1'  );
+        [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
+          double( validK ), tmpModel, '-b 1'  );
       else
-        [gPrdCls, acc, tmpScore ] = libsvmpredict( double( yValid ), ...
-          double( grpValidK ), tmpModel  );
+        [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
+          double( validK ), tmpModel  );
       end
-      if conf.isDebug 
-        % debug info
-        fprintf( 'tmpScore size: %d\n', size( tmpScore ) );
-      end
-      curModel.mapFeat( tmpValidIdx, cmpCls ) = tmpScore;
-
+      mapFeat( validIdx, cmpCls ) = tmpScore;
     end % end for grpCls
+    fprintf( '\n' );
   end % end for cluster
 end % end for fold
 
-%-----------------------------------------------
-% save current model to stage output
-%-----------------------------------------------
-save( cacheStage{ s }, 'curModel' );
+fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 
-fprintf( '\t get mapping SVM features time: %.2f (s)\n', toc );
+% end function GetSVMFeat

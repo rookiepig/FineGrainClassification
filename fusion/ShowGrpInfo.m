@@ -1,31 +1,31 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: show_group.m
-% Desc: show grouping results by images
-% Author: Zhang Kang
-% Date: 2013/12/30
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear;
-load( 'imdb.mat' );
-load( 'model.mat' );
-load( 'grp.mat' );
+function ShowGrpInfo( imdb, grpInfo )
+%% ShowgrpInfoInfo
+%  Desc: show images in each group each cluster (UI needs improve)
+%  In: 
+%    imdb -- (struct) image database
+%    grpInfoInfo -- (struct) group clustering info
+%  Out:
+%  
+%%
+fprintf( 'function: %s\n', mfilename );
 
-GRP_SYS_NUM = numel( grp );
-for g = 1 : GRP_SYS_NUM
+nGroup = numel( grpInfo );
+for g = 1 : nGroup
   fprintf( 'Group System: %d\n', g );
-  CLUSTER_NUM = numel( grp{ g }.cluster );
+  CLUSTER_NUM = numel( grpInfo{ g }.cluster );
   for c = 1 : CLUSTER_NUM
     fprintf( '\t Cluster: %d\n', c );
     P_WID = 5;
     P_HEI = 5;
     plotIdx = 1;
-    clsNum = length( grp{ g }.cluster{ c } );
+    clsNum = length( grpInfo{ g }.cluster{ c } );
     hFig = figure;
     fprintf( '\t Cur cluster classes: %d\n', clsNum );
     for clsId = 1 : clsNum
       if( clsId > P_HEI )
         break;
       end
-      imgIdx = ismember( imdb.clsLabel, grp{ g }.cluster{ c }( clsId ) );
+      imgIdx = ismember( imdb.clsLabel, grpInfo{ g }.cluster{ c }( clsId ) );
       clstImgName = imdb.imgName( imgIdx );
       perm = randperm( numel( clstImgName ) );
       selImgName = clstImgName( perm( 1 : P_WID ) );

@@ -1,34 +1,31 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: kernelToSim.m
-% Desc: convert kernel matrix to similarity matrix
-% Author: Zhang Kang
-% Date: 2014/01/02
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [clsSim] = KernelToSim( kernel, sampleLab, ttSplit )
+%% KernelToSim
+%  Desc: convert kernel matrix to class similarity matrix
+%  In: 
+%    kernel -- (nSample * nSample) kernel matrix
+%    sampleLab -- (nSample * 1) sample class label
+%    ttSplit -- (nSample * 1) sample training&testing split
+%  Out:
+%    clsSim -- (nClass * nClass) class similarity matrix
+%%
 
-% init configuration
-initConf;
+fprintf( 'function: %s\n', mfilename );
 
-if( exist( conf.clsSimPath ), 'file' )
-  fprintf( 'Load class similarity matrix from %s\n', conf.clsSimPath );
-  load( conf.clsSimPath );
-else
-  % load kernel
-  load( conf.kernelPath );
-  load( conf.imdbPath );
+train  = find( ttSplit == 1 );
+nClass = max( sampleLab );
+clsSim = zeros( nClass, nClass );
 
-  train = find( imdb.ttSplit == 1 );
-  numClasses = numel( imdb.clsName );
-  clsSim     = zeros( numClasses, numClasses );
-
-  % get class similarity
-  for y = 1 : numClasses
-    yIdx = intersect( find( imdb.clsLabel == y ), train );
-    for x = 1 : numClasses
-      xIdx = intersect( find( imdb.clsLabel == x ), train );
-      tmpK = kernel( yIdx, xIdx );
-      clsSim( y, x ) = sum( tmpK( : ) ) / ( length( yIdx ) * length( xIdx ) );
-    end
+% get class similarity
+for y = 1 : nClass
+  yIdx = intersect( find( sampleLab == y ), train );
+  for x = 1 : nClass
+    xIdx = intersect( find( sampleLab == x ), train );
+    clsSim( y, x ) = sum( sum( kernel( yIdx, xIdx ) ) ) / ...
+      ( length( yIdx ) * length( xIdx ) );
   end
-
-  save( )
+  if( y == x )
+    clsSim( y, x ) = 0;
+  end
 end
+
+% end function KernelToSim

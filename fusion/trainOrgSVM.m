@@ -1,51 +1,60 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: trainOrgSVM.m
-% Desc: train original SVM to get test mapping features
-% Author: Zhang Kang
-% Date: 2014/01/01
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
+  curGrp, mapFeat )
+%% TrainOrgSVM
+%  Desc: train original SVM to get test SVM feat
+%  In: 
+%    conf, imdb, kernel -- basic variables
+%    curGrp -- (struct) group clustering information
+%  Out:
+%    mapFeat -- (nSample * nClass) SVM feature with test SVM feat
+%    orgSVM  -- original SVM model
+%%
+
+fprintf( 'function: %s\n', mfilename );
 tic;
-fprintf( '\t train original SVM\n' );
 
-curModel.orgSVM = cell( 1, numClasses );
+% init basic variables
+nClass  = max( imdb.clsLabel );
+train   = find( imdb.ttSplit == 1 );
+test    = find( imdb.ttSplit == 0 );
 
-for c = 1 : grp{ g }.clusterNum
-  fprintf( '\t\tCluster: %d (%.2f %%)\n', c, 100 * c / grp{ g }.clusterNum );      
-  grpCls = grp{ g }.cluster{ c };
-  for cmpCls = grpCls
+orgSVM = cell( 1, nClass );
+
+for c = 1 : curGrp.nCluster
+  fprintf( '\t Cluster: %d (%.2f %%)\n', c, 100 * c / curGrp.nCluster );      
+  grpCls = curGrp.cluster{ c };
+  for gC = 1 : length( grpCls )
+    cmpCls = grpCls( gC );
     fprintf( '\t\t train test class: %d\n', cmpCls );
-    tmpTrainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
+    trainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
         train );
     % use clustering results
-    tmpTestIdx = intersect( find( grp{ g }.clsToCluster == c ), ...
+    testIdx = intersect( find( curGrp.clsToCluster == c ), ...
         test );
+    % prepare kernel
+    trainK = kernel( trainIdx, trainIdx );
+    testK = kernel( testIdx, trainIdx );
 
-    grpTrainK = kernel( tmpTrainIdx, tmpTrainIdx );
-    grpTestK = kernel( tmpTestIdx, tmpTrainIdx );
-
-    grpTrainK = [ ( 1 : size( grpTrainK, 1 ) )', grpTrainK ];
-    grpTestK = [ ( 1 : size( grpTestK, 1 ) )', grpTestK ];
+    trainK = [ ( 1 : size( trainK, 1 ) )', trainK ];
+    testK = [ ( 1 : size( testK, 1 ) )', testK ];
 
     % train original SVM
-    yTrain = 2 * ( imdb.clsLabel( tmpTrainIdx ) == cmpCls ) - 1 ;
-    yTest  = 2 * ( imdb.clsLabel( tmpTestIdx )  == cmpCls ) - 1 ;
-    curModel.orgSVM{ cmpCls } = libsvmtrain( double( yTrain ), double( grpTrainK ), ...
+    yTrain = 2 * ( imdb.clsLabel( trainIdx ) == cmpCls ) - 1 ;
+    yTest  = 2 * ( imdb.clsLabel( testIdx )  == cmpCls ) - 1 ;
+    orgSVM{ cmpCls } = libsvmtrain( double( yTrain ), double( trainK ), ...
       conf.orgSVMOPT ) ;
     % get test SVM score --> map features
     if( conf.isSVMProb )
-      [gPrdCls, acc, tmpScore ] = libsvmpredict( double( yTest ), ...
-        double( grpTestK ), curModel.orgSVM{ cmpCls }, '-b 1'  );
+      [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
+        double( testK ), orgSVM{ cmpCls }, '-b 1'  );
     else
-      [gPrdCls, acc, tmpScore ] = libsvmpredict( double( yTest ), ...
-        double( grpTestK ), curModel.orgSVM{ cmpCls }  );
+      [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
+        double( testK ), orgSVM{ cmpCls }  );
     end
-    curModel.mapFeat( tmpTestIdx, cmpCls ) = tmpScore;
+    mapFeat( testIdx, cmpCls ) = tmpScore;
   end % end for grpCls
 end % end for cluster
 
-%-----------------------------------------------
-% save current model to stage output
-%-----------------------------------------------
-save( cacheStage{ s }, 'curModel' );
+fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 
-fprintf( '\t train original SVM time: %.2f (s)\n', toc );
+% end function TrainOrgSVM

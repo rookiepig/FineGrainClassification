@@ -1,21 +1,27 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: splitCVFold.m
-% Desc: split n-fold cross validataion
-% Author: Zhang Kang
-% Date: 2014/01/01
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fprintf( 'Split %d fold cross validation for fusion\n', conf.foldNum );
+function [ cvTrain, cvValid ] = SplitCVFold( foldNum, sampleLab, ttSplit )
+%% SplitCVFold
+%  Desc: split training index to n-fold
+%  In: 
+%    foldNum -- number of fold
+%    sampleLab -- (nSample * 1) sample class label
+%    ttSplit -- (nSample * 1) sample training&testing split
+%  Out:
+%    cvTrain -- (1 * foldNum) train index for each fold
+%    cvValid  -- (1 * foldNum) validation index for each fold
+%%
 
-% split 10 fold training and validation set
-FOLD_NUM = conf.foldNum;
-cvTrain = cell( 1, FOLD_NUM );
-cvValid = cell( 1, FOLD_NUM );
-for c = 1 : numClasses
-  trnClsIdx = intersect( find( imdb.clsLabel == c  ), train );
+fprintf( 'function: %s\n', mfilename );
+
+train  = find( ttSplit == 1 );
+nClass = max( sampleLab );
+cvTrain = cell( 1, foldNum );
+cvValid = cell( 1, foldNum );
+for c = 1 : nClass
+  trnClsIdx = intersect( find( sampleLab == c  ), train );
   trnClsNum = length( trnClsIdx );
   perm = randperm( trnClsNum );
-  patt = ceil( trnClsNum / FOLD_NUM );
-  for f = 1 : FOLD_NUM
+  patt = ceil( trnClsNum / foldNum );
+  for f = 1 : foldNum
     if( c == 1 )
       cvValid{ f } = [];
       cvTrain{ f } = [];
@@ -27,4 +33,4 @@ for c = 1 : numClasses
   end
 end
 
-fprintf( '\n...Done\n' );
+% end function SplitCVFold
