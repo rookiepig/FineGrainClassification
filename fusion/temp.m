@@ -1,3 +1,11 @@
+for ii = 1 : 32
+  if( any( ismember( 128, curGrp.cluster{ ii } ) ) )
+    disp( ii );
+  end
+end
+
+
+
 meanAcc = 0;
 for c = 1 : curGrp.nCluster
   fprintf( '\t Cluster: %d (%.2f %%)\n', c, 100 * c / curGrp.nCluster );   

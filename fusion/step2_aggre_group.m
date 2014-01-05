@@ -25,7 +25,7 @@ end
 if( ~exist( conf.grpInfoPath, 'file' ) )
   grpInfo = cell( 1, conf.nGroup );
   for g = 1 : conf.nGroup
-    if( exist( cacheGrpInfo{ g } ) )
+    if( exist( cacheGrpInfo{ g }, 'file' ) )
       % load caecheGrpInfo
       load( cacheGrpInfo{ g } );
       grpInfo{ g } = curGrp;

@@ -32,8 +32,14 @@ for f = 1 : conf.nFold
       % init train valid index
       trainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
         cvTrain{ f } );
-      validIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
-        cvValid{ f } );
+      if( conf.useClusterPrior )
+        % use cluster information 
+        validIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
+          cvValid{ f } );
+      else
+        % all validation are tested on cluster SVM
+        validIdx = cvValid{ f };
+      end
 
       trainK = kernel( trainIdx, trainIdx );
       validK = kernel( validIdx , trainIdx );

@@ -28,9 +28,14 @@ for c = 1 : curGrp.nCluster
     fprintf( '\t\t train test class: %d\n', cmpCls );
     trainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
         train );
-    % use clustering results
-    testIdx = intersect( find( curGrp.clsToCluster == c ), ...
+    if( conf.useClusterPrior )
+      % use clustering prior
+      testIdx = intersect( find( curGrp.clsToCluster == c ), ...
         test );
+    else
+      testIdx = test;
+    end
+    
     % prepare kernel
     trainK = kernel( trainIdx, trainIdx );
     testK = kernel( testIdx, trainIdx );

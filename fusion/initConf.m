@@ -15,7 +15,7 @@ end
 %-----------------------------------------------
 % Manual paramters
 %-----------------------------------------------
-conf.prefix   = 'reorg';
+conf.prefix   = 'nocluster';
 conf.nFold  = 10;
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
@@ -36,9 +36,17 @@ conf.nGroup = 6;
 % Fusion paramters
 %-----------------------------------------------
 % map method: [svm,reg]
-coinf.mapType = 'reg';
+conf.mapType = 'reg';
+switch conf.mapType
+  case 'reg'
+    conf.regLambda = 1;
+  case 'svm'
+    conf.mapSVMOPT = [ '-c 10 -t 2 -q' ];
+end
 % fusion method: [average]
 conf.fusionType =  'average';
+% map feature normalization method [ 'l2', 'l1' ]
+conf.mapNormType ='l2';
 %-----------------------------------------------
 % SVM paramters
 %-----------------------------------------------
@@ -47,8 +55,6 @@ conf.orgSVMOPT = [ '-c 10 -t 4 -q' ];
 if( conf.isSVMProb )
   conf.orgSVMOPT = [ conf.orgSVMOPT, ' -b 1' ];
 end
-conf.mapSVMOPT = [ '-c 10 -t 2 -q' ];
-
 
 
 %-----------------------------------------------
