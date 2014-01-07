@@ -23,6 +23,7 @@ end
 
 % aggregate grpInfo
 if( ~exist( conf.grpInfoPath, 'file' ) )
+  fprintf( '\t aggregate grpInfo\n' );
   grpInfo = cell( 1, conf.nGroup );
   for g = 1 : conf.nGroup
     if( exist( cacheGrpInfo{ g }, 'file' ) )
@@ -34,12 +35,13 @@ if( ~exist( conf.grpInfoPath, 'file' ) )
     end
   end
   % save grpInfo
+  fprintf( '\t save grpInfo to %s\n', conf.grpInfoPath );
   save( conf.grpInfoPath, 'grpInfo' );
 end
 
 % aagregate grpModel
-
 if( ~exist( conf.grpModelPath, 'file' ) )
+  fprintf( '\t aggregate grpModel\n' );
   grpModel = cell( 1, conf.nGroup );
   for g = 1 : conf.nGroup
     if( exist( cacheGrpModel{ g }, 'file' ) )
@@ -51,6 +53,7 @@ if( ~exist( conf.grpModelPath, 'file' ) )
     end
   end
   % save grpModel
+  fprintf( '\t save grpModel to %s\n', conf.grpModelPath );
   save( conf.grpModelPath, 'grpModel' );
 end
 

@@ -10,7 +10,7 @@ function [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
 %    orgSVM  -- original SVM model
 %%
 
-fprintf( 'function: %s\n', mfilename );
+fprintf( '\t function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -60,6 +60,6 @@ for c = 1 : curGrp.nCluster
   end % end for grpCls
 end % end for cluster
 
-fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
+fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function TrainOrgSVM

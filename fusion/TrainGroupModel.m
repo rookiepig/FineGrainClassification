@@ -26,12 +26,14 @@ mapFeat = GetSVMFeat( conf, imdb, kernel, curGrp );
 % Stage3: train map model
 % set current model
 curModel.mapType = conf.mapType;
+curModel.nFold  = conf.nFold;
 curModel.mapFeat = mapFeat;
 curModel.orgSVM = orgSVM;
 
 switch conf.mapType
   case 'reg'
-    [ scores ] = TrainMapReg( conf, imdb, mapFeat );
+    mapFeat    = NormMapFeat( conf, imdb, mapFeat );
+    [ scores ] = TrainMapReg( conf, imdb, mapFeat, imdb.clsLabel );
     curModel.scores = scores;
   case 'svm'
     [ mapSVM, scores ] = TrainMapSVM(  conf, imdb, mapFeat );
@@ -41,8 +43,8 @@ switch conf.mapType
     fprintf( '\t Error: unknow map method: %s\n', conf.mapType );
 end
 
-
-
+% show curModel
 disp(curModel);
 
+fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 % end function TrainGroupModel

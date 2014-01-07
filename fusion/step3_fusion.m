@@ -13,14 +13,17 @@ load( conf.imdbPath );
 
 if( ~exist( conf.grpInfoPath, 'file' ) || ...
     ~exist( conf.grpModelPath, 'file' ) )
-    fprintf( 'Error: grpInfo and grpModel not exist\n' );
+    fprintf( 'Error: grpInfo or grpModel not exist\n' );
 else
   % fusion all group models
   load( conf.grpInfoPath );
   load( conf.grpModelPath );
   fusion = GroupFusion( conf, imdb, grpInfo, grpModel );
-  save( conf.fusionPath, 'fusion' );
 
+  % save fusion results and configurations
+  save( conf.fusionPath, 'fusion' );
+  save( conf.confPath, 'conf' );
+  
   %save confusion matrix to PDF file
   meanAccuracy = sprintf('mean accuracy: %.2f %%\n', ...
     100 * mean(diag(fusion.confusion)));

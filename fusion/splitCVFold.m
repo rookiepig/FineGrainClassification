@@ -10,7 +10,7 @@ function [ cvTrain, cvValid ] = SplitCVFold( foldNum, sampleLab, ttSplit )
 %    cvValid  -- (1 * foldNum) validation index for each fold
 %%
 
-fprintf( 'function: %s\n', mfilename );
+fprintf( '\t function: %s\n', mfilename );
 
 train  = find( ttSplit == 1 );
 nClass = max( sampleLab );

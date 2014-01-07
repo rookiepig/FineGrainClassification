@@ -40,7 +40,7 @@ else
     load( cacheGrpInfo{ grpID } );
   else
     % get curGrp by clusteering
-    nCluster = 2^( grpID - 1 );
+    nCluster = conf.nCluster( grpID );
     % clustering
     curGrp   = GroupClustering( nCluster );
     % cluster labeling

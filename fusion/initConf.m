@@ -6,7 +6,7 @@ function [ conf ] = InitConf( )
 %  Out:
 %    conf -- (struct) all configuration paramters
 %%
-fprintf( 'function: %s\n', mfilename );
+fprintf( '\t function: %s\n', mfilename );
 % config libraries
 if ( strcmp( computer(), 'GLNXA64' ) )
   run( '~/vlfeat/toolbox/vl_setup' );
@@ -15,8 +15,9 @@ end
 %-----------------------------------------------
 % Manual paramters
 %-----------------------------------------------
-conf.prefix   = 'nocluster';
-conf.nFold  = 10;
+conf.prefix   = 'noprior';
+% 5-fold SV to follow LIBSVM
+conf.nFold  = 5; 
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
 % flag paramters
@@ -24,6 +25,7 @@ conf.MAP_INIT_VAL = -100;
 conf.isDebug   = true;
 conf.isSVMProb = false;
 % use cluster prior to get final test scores
+% to strong! needs to be improved
 conf.useClusterPrior = false; 
 %-----------------------------------------------
 % Clustering paramters
@@ -31,7 +33,12 @@ conf.useClusterPrior = false;
 % cluster type: [spectral, tree]
 conf.clusterType = 'spectral';
 % group 1 --> no cluster
-conf.nGroup = 6;
+conf.nGroup = 8;
+% each group's cluster number
+conf.nCluster = zeros( conf.nGroup, 1 );
+for nc = 1 : conf.nGroup
+  conf.nCluster( nc ) = 2 ^ ( nc - 1 );
+end
 %-----------------------------------------------
 % Fusion paramters
 %-----------------------------------------------
@@ -40,11 +47,13 @@ conf.mapType = 'reg';
 switch conf.mapType
   case 'reg'
     conf.regLambda = 1;
+    % regression kernel [ rbf, linear ]
+    conf.regKerType = 'rbf';
   case 'svm'
     conf.mapSVMOPT = [ '-c 10 -t 2 -q' ];
 end
-% fusion method: [average]
-conf.fusionType =  'average';
+% fusion method: [average, reg]
+conf.fusionType =  'reg';
 % map feature normalization method [ 'l2', 'l1' ]
 conf.mapNormType ='l2';
 %-----------------------------------------------
@@ -71,7 +80,7 @@ conf.grpInfoPath  = fullfile( conf.outDir, [ conf.prefix '-grpInfo.mat' ] );
 conf.grpModelPath = fullfile( conf.outDir, [ conf.prefix '-grpModel.mat' ] );
 %
 conf.fusionPath   = fullfile( conf.outDir, [ conf.prefix '-fusion.mat' ] );
-conf.resultPath   = fullfile( conf.outDir, [ conf.prefix, '-result.mat' ] );
+conf.confPath     = fullfile( conf.outDir, [ conf.prefix, '-conf.mat' ] );
 
 % end function InitConf
 

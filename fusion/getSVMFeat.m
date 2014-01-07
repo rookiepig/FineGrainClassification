@@ -8,7 +8,7 @@ function [ mapFeat ] = GetSVMFeat( conf, imdb, kernel, curGrp )
 %    mapFeat -- (nSample * nClass) mapped SVM feature
 %%
 
-fprintf( 'function: %s\n', mfilename );
+fprintf( '\t function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -66,6 +66,6 @@ for f = 1 : conf.nFold
   end % end for cluster
 end % end for fold
 
-fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
+fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function GetSVMFeat
