@@ -15,15 +15,16 @@ end
 %-----------------------------------------------
 % Manual paramters
 %-----------------------------------------------
-conf.prefix   = 'noprior';
-% 5-fold SV to follow LIBSVM
+conf.prefix   = 'prob';
+% 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10; 
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
 % flag paramters
 %-----------------------------------------------
 conf.isDebug   = true;
-conf.isSVMProb = false;
+conf.isSVMProb = true;
+
 % use cluster prior to get final test scores
 % to strong! needs to be improved
 conf.useClusterPrior = false; 
@@ -52,8 +53,8 @@ switch conf.mapType
   case 'svm'
     conf.mapSVMOPT = [ '-c 10 -t 2 -q' ];
 end
-% fusion method: [average, reg]
-conf.fusionType =  'reg';
+% fusion method: [average, reg, vote(probability)]
+conf.fusionType =  'average';
 % map feature normalization method [ 'l2', 'l1' ]
 conf.mapNormType ='l2';
 %-----------------------------------------------
@@ -62,6 +63,7 @@ conf.mapNormType ='l2';
 conf.clusterSVMOPT = [ '-c 10 -t 4 -q' ];
 conf.orgSVMOPT = [ '-c 10 -t 4 -q' ];
 if( conf.isSVMProb )
+  conf.clusterSVMOPT = [ conf.clusterSVMOPT, ' -b 1' ];
   conf.orgSVMOPT = [ conf.orgSVMOPT, ' -b 1' ];
 end
 

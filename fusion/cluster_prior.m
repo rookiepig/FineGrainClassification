@@ -1,6 +1,7 @@
-% use cluster prior to 
+% use cluster prior
 
-% conf = InitConf();
+conf = InitConf();
+
 load( conf.imdbPath );
 load( conf.grpInfoPath );
 load( conf.grpModelPath );
@@ -14,11 +15,12 @@ nClass = max( imdb.clsLabel );
 % combine all groups' feature
 % allFeat = zeros( size( grpModel{ 1 }.mapFeat ) );
 allFeat = [];
-selGrp = [ 1 2 ];
+selGrp = [ 1 2 3 4 5 6 7 8 ];
 for s = 1 : length( selGrp );
   g = selGrp( s );
   fprintf( 'Group %d\n', g );
-  tryFeat =  grpModel{ g }.mapFeat;
+  clusterFeat =  grpInfo{ g }.clusterScore;
+  modelFeat   =  grpModel{ g }.mapFeat;
 
   % % cluster prior
   % cTc = grpInfo{ g }.clsToCluster;
@@ -33,11 +35,15 @@ for s = 1 : length( selGrp );
   % % one group result
 
 
-  tryFeat   = NormMapFeat( conf, imdb, tryFeat );
-  tryScores = TrainMapReg( conf, imdb, tryFeat, imdb.clsLabel );
+  clusterFeat = NormMapFeat( conf, imdb, clusterFeat );
+  modelFeat   = NormMapFeat( conf, imdb, modelFeat );
+  tryFeat     = [ clusterFeat, modelFeat ];
+  tryScores   = TrainMapReg( conf, imdb, tryFeat, imdb.clsLabel );
   
-  [ tryConf{ g }, tryMeanAcc( g ) ] = ScoreToConf( tryScores, testLab );
-  fprintf( '\t group %d -- Mean Acc: %.2f %%\n', g, tryMeanAcc( g ) );
+  [ tryConf{ g }, tryMeanAcc( g ) ] = ScoreToConf( tryScores( test, : ), testLab );
+  [ oldConf{ g }, oldMeanAcc( g ) ] = ScoreToConf( grpModel{ g }.scores( test, : ), testLab );
+  fprintf( '\t old Acc: %.2f %% v.s cluster Acc: %.2f %%\n', ...
+    oldMeanAcc( g ), tryMeanAcc( g ) );
 
   % combine feat
   allFeat = [ allFeat tryFeat ];
@@ -46,5 +52,5 @@ end
 % all groups results
 fprintf( 'All group reg mapping\n' );
 allScores = TrainMapReg( conf, imdb, allFeat, imdb.clsLabel );
-[ allConf, allMeanAcc ] = ScoreToConf( allScores, testLab );
+[ allConf, allMeanAcc ] = ScoreToConf( allScores( test, : ), testLab );
 fprintf( 'Mean Acc: %.2f %%\n', allMeanAcc );

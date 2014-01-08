@@ -5,7 +5,8 @@ test = find( imdb.ttSplit == 0 );
 testLab = imdb.clsLabel( test );
 nClass = max( imdb.clsLabel );
 
-for g = 2 : 6
+
+for g = 1 : 8
   fprintf( 'group %d\n', g );
   cmpAcc = zeros( grpInfo{ g }.nCluster, 2 );
   for c = 1 : grpInfo{ g }.nCluster
@@ -31,6 +32,8 @@ for g = 2 : 6
     fprintf( '\t org acc: %.2f %% -- g6 acc: %.2f %%\n', ...
       cmpAcc( c, 1 ), cmpAcc( c, 2 ) );
   end
+  oldAcc( g ) = mean( cmpAcc( :, 1 ) );
+  grpAcc( g ) = mean( cmpAcc( :, 2 ) );
   fprintf( 'mean org: %.2f %% -- mean group %d: %.2f %%\n', ...
     mean( cmpAcc( :, 1 ) ), g, mean( cmpAcc( :, 2 ) ) );
 end
