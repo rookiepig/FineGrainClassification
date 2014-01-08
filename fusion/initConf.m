@@ -17,7 +17,7 @@ end
 %-----------------------------------------------
 conf.prefix   = 'noprior';
 % 5-fold SV to follow LIBSVM
-conf.nFold  = 5; 
+conf.nFold  = 10; 
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
 % flag paramters

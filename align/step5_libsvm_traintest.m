@@ -44,6 +44,15 @@ ap11 = zeros( 1, numClasses );
 
 model = cell( 1, numClasses );
 
+% conver all kernel to train and test kernel
+numTrain = sum( selTrain );
+numTest = sum( selTest );
+kernelTrain = [ ( 1 : numTrain )', ...
+  kernel( train, train ) ];
+kernelTest = [ ( 1 : numTest )', ...
+  kernel( test, train ) ];
+clear kernel;
+
 for c = 1 : numClasses
   fprintf( '\n\t training class: %s (%.2f %%)\n', ...
     imdb.clsName{ c }, 100 * c / numClasses );

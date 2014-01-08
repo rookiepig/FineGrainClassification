@@ -31,7 +31,7 @@ else
   imagesc(fusion.confusion) ; axis square ;
   title(meanAccuracy) ;
   vl_printsize(1) ;
-  print('-dpdf', fullfile( conf.outDir, [ conf.prefix, 'confusion.pdf' ] ) );
+  print('-dpdf', fullfile( conf.outDir, [ conf.prefix, '-confusion.pdf' ] ) );
   %print('-djpeg', fullfile(conf.outDir, 'result-confusion.jpg')) ;
 
 end

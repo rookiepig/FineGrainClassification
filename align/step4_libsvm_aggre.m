@@ -36,7 +36,7 @@ if( exist( conf.kernelPath, 'file' ) )
   fprintf( '\n\t precompute kernel file exist: %s', conf.kernelPath );
 else
   ttImgNum = numel( imdb.imgName );
-  kernelAll = zeros( ttImgNum, ttImgNum );
+  kernel = zeros( ttImgNum, ttImgNum );
   jobSz = floor( ttImgNum / conf.jobNum );
   
   for jobID = 1 : conf.jobNum
@@ -51,22 +51,24 @@ else
       else
         rowEd = jobID * jobSz;
       end
-      kernelAll( rowSt : rowEd, : ) = jobKernel;
+      kernel( rowSt : rowEd, : ) = jobKernel;
     else
       fprintf( 2, '\n\t Error: tmp kernel file %s does not exist\n', ...
         conf.tmpKernelPath{ jobID } );
     end
   end
   % get training and testing kernel matrix
-  selTrain = ( imdb.ttSplit == 1 );
-  selTest =  ( imdb.ttSplit == 0 );
-  numTrain = sum( selTrain );
-  numTest = sum( selTest );
-  kernelTrain = [ ( 1 : numTrain )', ...
-    kernelAll( selTrain, selTrain ) ];
-  kernelTest = [ ( 1 : numTest )', ...
-    kernelAll( selTest, selTrain ) ];
-  save( conf.kernelPath, 'kernelTrain', 'kernelTest', '-v7.3'  );
+  % selTrain = ( imdb.ttSplit == 1 );
+  % selTest =  ( imdb.ttSplit == 0 );
+  % numTrain = sum( selTrain );
+  % numTest = sum( selTest );
+  % kernelTrain = [ ( 1 : numTrain )', ...
+  %   kernel( selTrain, selTrain ) ];
+  % kernelTest = [ ( 1 : numTest )', ...
+  %   kernel( selTest, selTrain ) ];
+
+  % save all kernel
+  save( conf.kernelPath, 'kernel', '-v7.3'  );
 end
 
 fprintf( '\n ...Done Aggregate Precomputed Kernel time: %.2f (s)',  toc );
