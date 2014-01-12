@@ -22,6 +22,9 @@ function [C, L, U] = SpectralClustering(W, k, Type)
 %   Year  : 2011/2012
 %   Bachelor Thesis
 
+PrintTab();fprintf( 'function: %s\n', mfilename );
+
+
 % calculate degree matrix
 degs = sum(W, 2);
 D    = sparse(1:size(W, 1), 1:size(W, 2), degs);

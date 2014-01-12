@@ -1,7 +1,7 @@
 function [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
   curGrp, mapFeat )
 %% TrainOrgSVM
-%  Desc: train original SVM to get test SVM feat
+%  Desc: train one-vs-all SVM to get test svm scores
 %  In: 
 %    conf, imdb, kernel -- basic variables
 %    curGrp -- (struct) group clustering information
@@ -10,7 +10,7 @@ function [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
 %    orgSVM  -- original SVM model
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -21,10 +21,12 @@ test    = find( imdb.ttSplit == 0 );
 orgSVM = cell( 1, nClass );
 
 for c = 1 : curGrp.nCluster
+  PrintTab();
   fprintf( '\t Cluster: %d (%.2f %%)\n', c, 100 * c / curGrp.nCluster );      
   grpCls = curGrp.cluster{ c };
   for gC = 1 : length( grpCls )
     cmpCls = grpCls( gC );
+    PrintTab();
     fprintf( '\t\t train test class: %d\n', cmpCls );
     trainIdx = intersect( find( ismember( imdb.clsLabel, grpCls ) ), ...
         train );
@@ -49,17 +51,13 @@ for c = 1 : curGrp.nCluster
     orgSVM{ cmpCls } = libsvmtrain( double( yTrain ), double( trainK ), ...
       conf.orgSVMOPT ) ;
     % get test SVM score --> map features
-    if( conf.isSVMProb )
-      [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
-        double( testK ), orgSVM{ cmpCls }, '-b 1'  );
-    else
-      [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
-        double( testK ), orgSVM{ cmpCls }  );
-    end
+    [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
+      double( testK ), orgSVM{ cmpCls }  );
+
     mapFeat( testIdx, cmpCls ) = tmpScore;
   end % end for grpCls
 end % end for cluster
 
-fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function TrainOrgSVM

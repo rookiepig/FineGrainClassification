@@ -9,7 +9,7 @@ function [clsSim] = KernelToSim( kernel, sampleLab, ttSplit )
 %    clsSim -- (nClass * nClass) class similarity matrix
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 train  = find( ttSplit == 1 );
 nClass = max( sampleLab );

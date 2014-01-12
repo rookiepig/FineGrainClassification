@@ -7,20 +7,20 @@ function ShowGrpInfo( imdb, grpInfo )
 %  Out:
 %  
 %%
-fprintf( 'function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 nGroup = numel( grpInfo );
 for g = 1 : nGroup
   fprintf( 'Group System: %d\n', g );
   CLUSTER_NUM = numel( grpInfo{ g }.cluster );
   for c = 1 : CLUSTER_NUM
-    fprintf( '\t Cluster: %d\n', c );
+    PrintTab();fprintf( '\t Cluster: %d\n', c );
     P_WID = 5;
     P_HEI = 5;
     plotIdx = 1;
     clsNum = length( grpInfo{ g }.cluster{ c } );
     hFig = figure;
-    fprintf( '\t Cur cluster classes: %d\n', clsNum );
+    PrintTab();fprintf( '\t Cur cluster classes: %d\n', clsNum );
     for clsId = 1 : clsNum
       if( clsId > P_HEI )
         break;

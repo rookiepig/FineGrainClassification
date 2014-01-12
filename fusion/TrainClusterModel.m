@@ -7,20 +7,20 @@ function [ curGrp ] = TrainClusterModel( curGrp )
 %    curGrp -- (struct) 
 %      - curGrp.nCluster  - number of clusters
 %      - curGrp.cluster      - (1 * nCluster) class index
-%      - curGrp.clusterGtLab - (nSample * 1) ground truth cluster label 
+%      - clusterGtLab - (nSample * 1) ground truth cluster label 
 %      - curGrp.clusterSVM   - (1 * nCluster) SVM model
 %      - curGrp.testScore - (nSample * cluterNum) SVM score
 %      - curGrp.testConf  - (nCluster * nCluster) confusion matrix
 %      - curGrp.clsToCluster - (nSample * 1) cluster for each sample
 %%
 
-fprintf( 'function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
 % init basic variables
 conf = InitConf( );
 load( conf.imdbPath );
-fprintf( '\t loading kernel (maybe slow)\n' );
+PrintTab();fprintf( '\t loading kernel (maybe slow)\n' );
 load( conf.kernelPath );
 nSample = length( imdb.clsLabel );
 train = find( imdb.ttSplit == 1 );
@@ -28,24 +28,26 @@ test  = find( imdb.ttSplit == 0 );
 clsNum = curGrp.nCluster;
 
 % get cluster label
-curGrp.clusterGtLab = zeros( size( imdb.clsLabel ) );
+clusterGtLab = zeros( size( imdb.clsLabel ) );
 for k = 1 : curGrp.nCluster
   clusterIdx = find( ismember( imdb.clsLabel, curGrp.cluster{ k } ) );
-  curGrp.clusterGtLab( clusterIdx ) = k;
+  clusterGtLab( clusterIdx ) = k;
 end
+% save to curGrp
+curGrp.clusterGtLab = clusterGtLab;
 
 % record libsvm probability option!
-curGrp.isSVMProb = conf.isSVMProb;
+curGrp.isOVOSVM = conf.isOVOSVM;
 
-if( conf.isSVMProb )
-
-  %% use libsvm probability output
-  fprintf( '\t use libsvm probability\n' );
+if( conf.isOVOSVM )
+  %% use one-vs-one libsvm prob
+  PrintTab();fprintf( '\t use libsvm one-vs-one probability\n' );
   if( clsNum == 1 )
     % one cluster no need to train
+    PrintTab();
     fprintf( '\t Warning: only one cluster no need to train\n' );
     curGrp.clusterSVM = [];
-    curGrp.clsToCluster = curGrp.clusterGtLab;
+    curGrp.clsToCluster = clusterGtLab;
     curGrp.clusterProb  =  ones( size( imdb.clsLabel ) );
   else
     % init training and testing kernel
@@ -53,13 +55,13 @@ if( conf.isSVMProb )
     trainK = [ ( 1 : size( trainK, 1 ) )', trainK ];
     allK  = kernel( : , train );
     allK = [ ( 1 : size( allK, 1 ) )', allK ];
-    yTrain = curGrp.clusterGtLab( train );
-    yAll  = curGrp.clusterGtLab;
+    yTrain = clusterGtLab( train );
+    yAll  = clusterGtLab;
     % train libsvm (with probability)
     curGrp.clusterSVM = libsvmtrain( double( yTrain ), ...
       trainK, conf.clusterSVMOPT );
     % test
-    [ tmpPred, tmpAcc, tmpProb ] = libsvmpredict( double( yAll ), ...
+    [ tmpPred, ~, tmpProb ] = libsvmpredict( double( yAll ), ...
       allK, curGrp.clusterSVM, '-b 1' );
     % get all predicted clusters
     curGrp.clsToCluster = tmpPred;
@@ -72,20 +74,24 @@ if( conf.isSVMProb )
 
   % get confusion matrix
   [ curGrp.trainConf, curGrp.trainAcc ] = ...
-    ScoreToConf( curGrp.clusterProb( train, : ), curGrp.clusterGtLab( train ) );
+    ScoreToConf( curGrp.clusterProb( train, : ), clusterGtLab( train ) );
+  PrintTab();
   fprintf( '\t train mean accuracy: %.2f %%\n', curGrp.trainAcc );
   [ curGrp.testConf, curGrp.testAcc ] = ...
-    ScoreToConf( curGrp.clusterProb( test, : ), curGrp.clusterGtLab( test ) );
+    ScoreToConf( curGrp.clusterProb( test, : ), clusterGtLab( test ) );
+  PrintTab();
   fprintf( '\t test mean accuracy: %.2f %%\n', curGrp.testAcc );
 else
-
   %% n-fold CV get train cluster scores
+  PrintTab();
+  fprintf( '\t %d-fold CV one-vs-all cluster SVM\n', conf.nFold );
   % get train valid index
   [ cvTrain, cvValid ] = SplitCVFold( conf.nFold, ...
-    curGrp.clusterGtLab, imdb.ttSplit );
-  % using n-fold CV to get training sample cluster label
+    clusterGtLab, imdb.ttSplit );
+  % using n-fold CV to get training sample cluster score
   curGrp.clusterScore = zeros( nSample, clsNum );
   for f = 1 : conf.nFold
+    PrintTab();
     fprintf( '\t Fold: %d (%.2f %%)\n', f, 100 * f / conf.nFold );
     % init train valid index
     trainIdx = cvTrain{ f };
@@ -97,9 +103,9 @@ else
     validK = [ ( 1 : size( validK, 1 ) )', validK ];
     % train classifier
     for c = 1 : clsNum
-      fprintf( '\t fold cluster class: %d (%.2f %%)\n', c, 100 * c / clsNum );
-      yTrain = 2 * ( curGrp.clusterGtLab( trainIdx ) == c ) - 1;
-      yValid = 2 * ( curGrp.clusterGtLab( validIdx ) == c ) - 1;
+      fprintf( '.*' );
+      yTrain = 2 * ( clusterGtLab( trainIdx ) == c ) - 1;
+      yValid = 2 * ( clusterGtLab( validIdx ) == c ) - 1;
       % train
       tmpSVM = libsvmtrain( double( yTrain ), ...
         double( trainK ), conf.clusterSVMOPT );
@@ -108,6 +114,7 @@ else
         double( validK ), tmpSVM );
       curGrp.clusterScore( validIdx, c ) = tmpScore;
     end
+    fprintf( '\n' );
   end % end each fold
 
   %% all train sample to get test cluster scores
@@ -120,8 +127,9 @@ else
   curGrp.clusterSVM = cell( 1, clsNum );
   % get test cluster label
   for c = 1 : clsNum
+    PrintTab();
     fprintf( '\t cluster train test: %d (%.2f %%)\n', c, 100 * c / clsNum );
-    y = 2 * ( curGrp.clusterGtLab == c ) - 1;
+    y = 2 * ( clusterGtLab == c ) - 1;
     % train
     curGrp.clusterSVM{ c } = libsvmtrain( double( y( train ) ), ...
       double( trainK ), conf.clusterSVMOPT );
@@ -131,28 +139,45 @@ else
     curGrp.clusterScore( test, c ) = tmpScore;
   end
 
-  %% get all predicted cluster labels
-  [ ~, trainPred ] = max( curGrp.clusterScore( train, : ), [], 2 );
-  [ ~, testPred ] = max( curGrp.clusterScore( test, : ), [], 2 );
+  %% cluster score mapping
+  PrintTab();fprintf( '\t cluster score map type %s\n', conf.mapType );
+  curGrp.mapType = conf.mapType;
+  switch conf.mapType
+    case 'reg'
+      % kernel regression
+      curGrp.clusterScore = NormMapFeat( conf, imdb, curGrp.clusterScore );
+      curGrp.clusterProb  = TrainMapReg( conf, imdb, ...
+        curGrp.clusterScore, clusterGtLab );
+    case 'softmax'
+      % softmax regression --> probability
+      [ wSoftmax, proAll ] = MultiLRL2( curGrp.clusterScore( train, : ), ...
+                                        clusterGtLab( train ), ...
+                                        curGrp.clusterScore );
+      curGrp.wSoftmax = wSoftmax;
+      curGrp.clusterProb = proAll;
+    otherwise
+      PrintTab();fprintf( 'Error: unknown map type: %s\n', conf.mapType );
+  end
+
+  % set predicted cluster label
+  [ ~, trainPred ] = max( curGrp.clusterProb( train, : ), [], 2 );
+  [ ~, testPred ] = max( curGrp.clusterProb( test, : ), [], 2 );
   curGrp.clsToCluster = zeros( size( imdb.clsLabel ) );
   curGrp.clsToCluster( train ) = trainPred;
   curGrp.clsToCluster( test ) = testPred;
+
   % get confusion matrix
   [ curGrp.trainConf, curGrp.trainAcc ] = ...
-    ScoreToConf( curGrp.clusterScore( train, : ), curGrp.clusterGtLab( train ) );
-  fprintf( '\t train mean accuracy: %.2f %%\n', curGrp.trainAcc );
+    ScoreToConf( curGrp.clusterProb( train, : ), clusterGtLab( train ) );
+  PrintTab();
+  fprintf( '\t train cluster mA: %.2f %%\n', curGrp.trainAcc );
   [ curGrp.testConf, curGrp.testAcc ] = ...
-    ScoreToConf( curGrp.clusterScore( test, : ), curGrp.clusterGtLab( test ) );
-  fprintf( '\t test mean accuracy: %.2f %%\n', curGrp.testAcc );
-  % kernel regression
-  curGrp.regScore = TrainMapReg( conf, imdb, ...
-    curGrp.clusterScore, curGrp.clusterGtLab );
-  [ curGrp.regConf, curGrp.regAcc ] = ...
-    ScoreToConf( curGrp.regScore( test, : ), curGrp.clusterGtLab( test ) );
-  fprintf( '\t reg mean accuracy: %.2f %%\n', curGrp.regAcc );
+    ScoreToConf( curGrp.clusterProb( test, : ), clusterGtLab( test ) );
+  PrintTab();
+  fprintf( '\t test cluster mA: %.2f %%\n', curGrp.testAcc );
 
-end % if isSVMProb
+end % end if( isOVOSVM )
 
-fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function TrainClusterModel

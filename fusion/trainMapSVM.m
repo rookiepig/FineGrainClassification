@@ -9,7 +9,7 @@ function [ mapSVM, scores ] = TrainMapSVM( conf, imdb, mapFeat )
 %    scores  -- (nSample * nClass) final score for map SVM
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -22,7 +22,7 @@ mapSVM = cell( 1, nClass );
 scores = cell( 1, nClass );
 
 % normalize all map features
-fprintf( '\t normalize map features\n' );
+PrintTab();fprintf( 'normalize map features\n' );
 for m = 1 : nSample
   z = mapFeat( m, : );
   % find value equal to MAP_INIT_VAl
@@ -35,8 +35,9 @@ for m = 1 : nSample
 end
 
 % train map SVM
-fprintf( '\t train map SVM\n' );
+PrintTab();fprintf( 'train map SVM\n' );
 for c = 1 : nClass
+  PrintTab();
   fprintf( '\t train test map SVM class: %d (%.2f %%)\n', c, 100 * c / nClass );
   yTrain = 2 * ( imdb.clsLabel( train ) == c ) - 1 ;
   yTest  = 2 * ( imdb.clsLabel( test )  == c ) - 1 ;
@@ -49,6 +50,6 @@ end % end for class
 
 scores = cat( 2, scores{ : } );
 
-fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function TrainMapSVM

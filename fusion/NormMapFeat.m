@@ -8,13 +8,13 @@ function [ mapFeat ] = NormMapFeat( conf, imdb, mapFeat )
 %    mapFeat -- (nSample * nClass) SVM feature with test SVM feat
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 % init basic variables
 nSample = length( imdb.clsLabel );
 
 % normalize all map features
-fprintf( '\t normalize method: %s\n', conf.mapNormType );
+PrintTab();fprintf( '\t normalize method: %s\n', conf.mapNormType );
 for m = 1 : nSample
   z = mapFeat( m, : );
   % find value equal to MAP_INIT_VAl

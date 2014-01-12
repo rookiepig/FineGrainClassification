@@ -6,13 +6,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function step1_train_group( grpID )
 
-fprintf( 'Run: %s\n', mfilename );
+PrintTab();fprintf( 'Run: %s\n', mfilename );
 
 % get configuration
 conf = InitConf( );
 
 if( grpID > conf.nGroup )
-  fprintf( 'Error: task index esceed maimum group\n' );
+  PrintTab();fprintf( 'Error: task index esceed maimum group\n' );
   return;
 end
 
@@ -30,12 +30,13 @@ end
 % curGrp
 if( exist( conf.grpInfoPath, 'file' ) )
   % get curGrp from grpInfo
-  fprintf( 'Load grpInfo from file %s\n', conf.grpInfoPath );
+  PrintTab();fprintf( 'Load grpInfo from file %s\n', conf.grpInfoPath );
   load( conf.grpInfoPath );
   curGrp = grpInfo{ grpID };
 else
   if( exist( cacheGrpInfo{ grpID }, 'file' ) )
     % load curGrp
+    PrintTab();
     fprintf( 'Load cacheGrpInfo from file %s\n', cacheGrpInfo{ grpID } );
     load( cacheGrpInfo{ grpID } );
   else

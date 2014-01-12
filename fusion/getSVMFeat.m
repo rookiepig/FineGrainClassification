@@ -8,7 +8,7 @@ function [ mapFeat ] = GetSVMFeat( conf, imdb, kernel, curGrp )
 %    mapFeat -- (nSample * nClass) mapped SVM feature
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -22,8 +22,9 @@ nClass  = max( imdb.clsLabel );
 mapFeat = zeros( nSample, nClass ) + conf.MAP_INIT_VAL;
 
 for f = 1 : conf.nFold
-  fprintf( '\t Fold: %d (%.2f %%)\n', f, 100 * f / conf.nFold );
+  PrintTab();fprintf( '\t Fold: %d (%.2f %%)\n', f, 100 * f / conf.nFold );
   for c = 1 : curGrp.nCluster
+    PrintTab();
     fprintf( '\t\t Cluster: %d (%.2f %%)\n', c, 100 * c / curGrp.nCluster );
     grpCls = curGrp.cluster{ c };
     for gC = 1 : length( grpCls )
@@ -53,19 +54,15 @@ for f = 1 : conf.nFold
       tmpModel = libsvmtrain( double( yTrain ), double( trainK ), ...
         conf.orgSVMOPT ) ;
       % get valid SVM score --> map features
-      if( conf.isSVMProb )
-        [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
-          double( validK ), tmpModel, '-b 1'  );
-      else
-        [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
-          double( validK ), tmpModel  );
-      end
+      [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
+        double( validK ), tmpModel  );
+
       mapFeat( validIdx, cmpCls ) = tmpScore;
     end % end for grpCls
     fprintf( '\n' );
   end % end for cluster
 end % end for fold
 
-fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function GetSVMFeat

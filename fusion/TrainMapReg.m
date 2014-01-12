@@ -10,7 +10,7 @@ function [ scores ] = TrainMapReg( conf, imdb, mapFeat, sampleLab )
 %    scores  -- (nSample * nClass) final score for map SVM
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -25,7 +25,7 @@ allFeat  = mapFeat;
 lambda = conf.regLambda;
 
 % prepare train and all sample kernel
-fprintf( '\t reg kernel: %s\n', conf.regKerType );
+PrintTab();fprintf( '\t reg kernel: %s\n', conf.regKerType );
 switch conf.regKerType
   case 'rbf'
     dist = EuDist2( trainFeat, trainFeat );
@@ -36,7 +36,7 @@ switch conf.regKerType
     trainK = trainFeat * trainFeat';
     allK  = allFeat * trainFeat';
   otherwise
-    fprintf( '\t unknow reg kernel: %s\n', conf.regKerType );
+    PrintTab();fprintf( '\t unknow reg kernel: %s\n', conf.regKerType );
 end
 
 
@@ -51,6 +51,6 @@ for m = 1 : length( train )
 end
 scores = allK * ( ( trainK + lambda * eye( size( trainK ) ) ) \ trainGt );
 
-fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function TrainMapReg

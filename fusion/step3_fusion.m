@@ -4,7 +4,7 @@
 % Author: Zhang Kang
 % Date: 2014/01/03
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fprintf( 'Run: %s\n', mfilename );
+PrintTab();fprintf( 'Run: %s\n', mfilename );
 
 % init configuration
 conf = InitConf( );
@@ -13,7 +13,7 @@ load( conf.imdbPath );
 
 if( ~exist( conf.grpInfoPath, 'file' ) || ...
     ~exist( conf.grpModelPath, 'file' ) )
-    fprintf( 'Error: grpInfo or grpModel not exist\n' );
+    PrintTab();fprintf( 'Error: grpInfo or grpModel not exist\n' );
 else
   % fusion all group models
   load( conf.grpInfoPath );

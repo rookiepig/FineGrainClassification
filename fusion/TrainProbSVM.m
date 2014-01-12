@@ -1,6 +1,6 @@
 function [ probFeat, probSVM ] =  TrainProbSVM( conf, imdb, kernel, curGrp )
 %% TrainProbSVM
-%  Desc: train each class SVM for each cluster using libsvm probability
+%  Desc: train one-vs-one svm to get libsvm prob output
 %  In: 
 %    conf, imdb, kernel -- basic variables
 %    curGrp -- (struct) group clustering information
@@ -9,7 +9,7 @@ function [ probFeat, probSVM ] =  TrainProbSVM( conf, imdb, kernel, curGrp )
 %    probSVM  -- (nCluster * 1) class SVM model for each cluster
 %%
 
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
 % init basic variables
@@ -25,11 +25,11 @@ probSVM  = cell( 1, nCluster );
 probFeat = zeros( nSample, nClass );
 
 for c = 1 : nCluster
-  fprintf( '\t Cluster: %d (%.2f %%)\n', c, 100 * c / nCluster );      
+  PrintTab();fprintf( '\t Cluster: %d (%.2f %%)\n', c, 100 * c / nCluster );      
   grpCls = curGrp.cluster{ c };
   if( length( grpCls ) == 1  )
     % only one class in cluster
-    fprintf( '\t Warning: only one class no need to train\n' );
+    PrintTab();fprintf( '\t Warning: only one class no need to train\n' );
     probSVM{ c } = [];
     probFeat( :, grpCls( 1 ) ) = 1;
   else
@@ -57,6 +57,6 @@ for c = 1 : nCluster
   end % end if( length( grpCls ) == 1  )
 end % end for cluster
 
-fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( '\t function: %s -- time: %.2f (s)\n', mfilename, toc );
 
 % end function TrainProbSVM

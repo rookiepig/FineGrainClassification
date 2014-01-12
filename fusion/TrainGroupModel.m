@@ -6,55 +6,60 @@ function [ curModel ] = TrainGroupModel( curGrp )
 %  Out:
 %    curModel -- (struct) group model
 %%
-fprintf( 'function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 % init configuration
 conf = InitConf( );
 % load imdb, kernel
 load( conf.imdbPath );
-fprintf( '\t loading kernel (maybe slow)\n' );
+PrintTab();fprintf( '\t loading kernel (maybe slow)\n' );
 load( conf.kernelPath );
 
 %% Train current group model
 disp( curGrp );
 
-curModel.isSVMProb = conf.isSVMProb;
-if( conf.isSVMProb )
+curModel.isOVOSVM = conf.isOVOSVM;
+if( conf.isOVOSVM )
   %% use libsvm probability
-  fprintf( '\t use libsvm probability\n' );
-  [ probFeat, probSVM ] =  TrainProbSVM( conf, imdb, kernel, curGrp );
+  PrintTab();fprintf( '\t one-vs-one class SVM to libsvm prob\n' );
+  [ probFeat, ovoSVM ] =  TrainProbSVM( conf, imdb, kernel, curGrp );
   curModel.probFeat = probFeat;
-  curModel.probSVM  = probSVM;
+  curModel.ovoSVM  = ovoSVM;
 else
+  PrintTab();fprintf( '\t one-vs-all class SVM\n' );
   % Stage1: get SVM features
-  mapFeat = GetSVMFeat( conf, imdb, kernel, curGrp );
+  svmScore = GetSVMFeat( conf, imdb, kernel, curGrp );
   % Stage2: train original SVM
-  [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
-    curGrp, mapFeat );
+  [ svmScore, ovaSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
+    curGrp, svmScore );
   % Stage3: train map model
   % set current model
-  curModel.mapType = conf.mapType;
   curModel.nFold  = conf.nFold;
-  curModel.mapFeat = mapFeat;
-  curModel.orgSVM = orgSVM;
-
+  curModel.svmScore = svmScore;
+  curModel.ovaSVM = ovaSVM;
+  curModel.mapType = conf.mapType;
+  PrintTab();fprintf( '\t class SVM map type: %s\n', conf.mapType );
   switch conf.mapType
     case 'reg'
-      mapFeat    = NormMapFeat( conf, imdb, mapFeat );
-      [ scores ] = TrainMapReg( conf, imdb, mapFeat, imdb.clsLabel );
-      curModel.scores = scores;
+      svmScore = NormMapFeat( conf, imdb, svmScore );
+      probFeat = TrainMapReg( conf, imdb, svmScore, imdb.clsLabel );
     case 'svm'
-      [ mapSVM, scores ] = TrainMapSVM(  conf, imdb, mapFeat );
-      curModel.mapSVM = mapSVM;
-      curModel.scores = scores;
+      [ mapSVM, probFeat ] = TrainMapSVM(  conf, imdb, svmScore );
+      curModel.mapSVM      = mapSVM;
+    case 'softmax'
+      % bayes combine cluster and class prob
+      probFeat           = TrainMapSoft( conf, imdb, curGrp, svmScore );
+      curModel.probFeat  = probFeat;
+      curModel.bayesProb = BayesCombine( conf, imdb, curGrp, curModel );
     otherwise
-      fprintf( '\t Error: unknow map method: %s\n', conf.mapType );
+      PrintTab();fprintf( '\t Error: unknow map method: %s\n', conf.mapType );
   end
-
-end % end if isSVMProb
+  % set probFeat
+  curModel.probFeat = probFeat;
+end % end if isOVOSVM
 
 % show curModel
 disp(curModel);
 
-fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 % end function TrainGroupModel

@@ -10,8 +10,7 @@ function [ clusterResult, clsResult, mapResult ] = ShowOneGroup( conf, curGrp, c
 %    clsAcc -- class accuracy
 %%
 
-% fprintf( 'function: %s\n', mfilename );
-
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 if( exist( 'curModel', 'var' ) && exist( 'curGrp', 'var' ) )
   load( conf.imdbPath );
@@ -23,14 +22,17 @@ if( exist( 'curModel', 'var' ) && exist( 'curGrp', 'var' ) )
   % disp( curModel );
   
   [ clusterResult.conf, clusterResult.mA ] = ScoreToConf( curGrp.clusterScore, testClusterLab );
-  fprintf( '\t Cluster accuracy: %.2f %%\n', clusterResult.mA );
+  PrintTab();
+  fprintf( 'Cluster accuracy: %.2f %%\n', clusterResult.mA );
   [ clsResult.conf, clsResult.mA ] = ScoreToConf( curModel.scores, testClsLab );
-  fprintf( '\t Class accuracy: %.2f %%\n', clsResult.mA );
+  PrintTab();
+  fprintf( 'Class accuracy: %.2f %%\n', clsResult.mA );
   [ mapResult.conf, mapResult.mA ] = ScoreToConf( curModel.mapFeat( test, : ), testClsLab );
-  fprintf( '\t Map accuracy: %.2f %%\n', mapResult.mA  );
+  PrintTab();
+  fprintf( 'Map accuracy: %.2f %%\n', mapResult.mA  );
   
 else
-  fprintf( 'Error: missing curModel or curGrp var\' );
+  PrintTab();fprintf( 'Error: missing curModel or curGrp var\' );
 end
 
 % end function ShowOneGroup

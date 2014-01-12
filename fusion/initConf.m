@@ -6,16 +6,18 @@ function [ conf ] = InitConf( )
 %  Out:
 %    conf -- (struct) all configuration paramters
 %%
-fprintf( '\t function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
+
 % config libraries
 if ( strcmp( computer(), 'GLNXA64' ) )
   run( '~/vlfeat/toolbox/vl_setup' );
   addpath( '~/libsvm/matlab/' );
+  addpath( genpath( '~/minConf/') );
 end
 %-----------------------------------------------
 % Manual paramters
 %-----------------------------------------------
-conf.prefix   = 'prob';
+conf.prefix   = 'prob-ova';
 % 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10; 
 conf.MAP_INIT_VAL = -100;
@@ -23,7 +25,9 @@ conf.MAP_INIT_VAL = -100;
 % flag paramters
 %-----------------------------------------------
 conf.isDebug   = true;
-conf.isSVMProb = true;
+
+% use one-vs-one SVM to get prob output
+conf.isOVOSVM = false;
 
 % use cluster prior to get final test scores
 % to strong! needs to be improved
@@ -43,8 +47,9 @@ end
 %-----------------------------------------------
 % Fusion paramters
 %-----------------------------------------------
-% map method: [svm,reg]
-conf.mapType = 'reg';
+% map method: [svm,reg,softmax]
+% to make svm score comparable
+conf.mapType = 'softmax';
 switch conf.mapType
   case 'reg'
     conf.regLambda = 1;
@@ -52,6 +57,7 @@ switch conf.mapType
     conf.regKerType = 'rbf';
   case 'svm'
     conf.mapSVMOPT = [ '-c 10 -t 2 -q' ];
+  % case 'softmax'
 end
 % fusion method: [average, reg, vote(probability)]
 conf.fusionType =  'average';
@@ -62,7 +68,8 @@ conf.mapNormType ='l2';
 %-----------------------------------------------
 conf.clusterSVMOPT = [ '-c 10 -t 4 -q' ];
 conf.orgSVMOPT = [ '-c 10 -t 4 -q' ];
-if( conf.isSVMProb )
+if( conf.isOVOSVM )
+  % one-vs-one SVM --> libsvm prob
   conf.clusterSVMOPT = [ conf.clusterSVMOPT, ' -b 1' ];
   conf.orgSVMOPT = [ conf.orgSVMOPT, ' -b 1' ];
 end

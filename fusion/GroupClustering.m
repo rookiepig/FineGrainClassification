@@ -10,13 +10,13 @@ function [ oneGrp ] = GroupClustering( nCluster )
 %      - oneGrp.clsToCluster - nSample * 1 indicator
 %%
 
-fprintf( 'function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 % get configuration
 conf = InitConf( );
 % load imdb, kernel
 load( conf.imdbPath );
-fprintf( '\t loading kernel (maybe slow)\n' );
+PrintTab();fprintf( '\t loading kernel (maybe slow)\n' );
 load( conf.kernelPath );
 
 % get similarity matrix
@@ -26,8 +26,8 @@ clsSim = KernelToSim( kernel, imdb.clsLabel, imdb.ttSplit );
 oneGrp.nCluster = nCluster;
 oneGrp.cluster = cell( 1, nCluster );
 % clusterring
-fprintf( '\t Cluaster method: %s\n', conf.clusterType );
-fprintf( '\t Cluaster number: %d\n', nCluster );
+PrintTab();fprintf( '\t Cluaster method: %s\n', conf.clusterType );
+PrintTab();fprintf( '\t Cluaster number: %d\n', nCluster );
 switch conf.clusterType
   case 'spectral'
     % Spectral clustering
@@ -37,8 +37,9 @@ switch conf.clusterType
     end
   case 'tree'
     % load from phylogeny tree
-    fprintf( '\t Load phylogeny tree manually\n' );
+    PrintTab();fprintf( '\t Load phylogeny tree manually\n' );
   otherwise
+    PrintTab();
     fprintf( '\t Error: unknow clustering method %s\n', conf.clusterType );
 end
 

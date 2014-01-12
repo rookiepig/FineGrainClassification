@@ -9,7 +9,7 @@ function [confusion, meanAcc] = ScoreToConf( scores, label )
 %    meanAcc   -- mean accuracy
 %%
 
-% fprintf( 'function: %s\n', mfilename );
+PrintTab();fprintf( 'function: %s\n', mfilename );
 
 % confusion matrix
 nClass = max( label );
@@ -21,6 +21,7 @@ for c = 1 : nClass
 end
 
 meanAcc = 100 * mean(diag(confusion));
+
 % fprintf( '\t Mean accuracy: %.2f %%\n', meanAcc );
 
 % end function ScoreToConf
