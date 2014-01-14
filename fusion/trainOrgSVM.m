@@ -13,6 +13,10 @@ function [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
 PrintTab();fprintf( 'function: %s\n', mfilename );
 tic;
 
+%% different svm.C for different cluster
+curSVMOPT = sprintf( '-c %f -t 4 -q', 10 * curGrp.nCluster );
+
+
 % init basic variables
 nClass  = max( imdb.clsLabel );
 train   = find( imdb.ttSplit == 1 );
@@ -49,7 +53,8 @@ for c = 1 : curGrp.nCluster
     yTrain = 2 * ( imdb.clsLabel( trainIdx ) == cmpCls ) - 1 ;
     yTest  = 2 * ( imdb.clsLabel( testIdx )  == cmpCls ) - 1 ;
     orgSVM{ cmpCls } = libsvmtrain( double( yTrain ), double( trainK ), ...
-      conf.orgSVMOPT ) ;
+      curGrp.grpSVMOPT );
+      % conf.orgSVMOPT ) ;
     % get test SVM score --> map features
     [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
       double( testK ), orgSVM{ cmpCls }  );

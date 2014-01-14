@@ -22,21 +22,21 @@ nClass = max( imdb.clsLabel );
 scores  = zeros( nSample, nClass);
 
 % average
-% selGrp = [ 1 2 3 4 5 6 7 8 ];
-% for s = 1 : length( selGrp );
-%   g = selGrp( s );
-%   scores = scores + grpModel{ g }.bayesProb;
-% end
-% scores = scores ./ length( selGrp );
-
-% try vote
-selGrp = [1 2 3 4 5 6 7 8 ];
+selGrp = [ 1 ];
 for s = 1 : length( selGrp );
   g = selGrp( s );
-  sampleIdx = ( 1 : nSample )';
-  [ ~, grpPred ] = max( grpModel{ g }.bayesProb, [], 2 );
-  scores = scores + full( sparse( sampleIdx, grpPred, 1, nSample, nClass ) );
+  scores = scores + grpModel{ g }.svmScore;
 end
+scores = scores ./ length( selGrp );
+
+% try vote
+% selGrp = [1 2 3 4 5 6 7 8 ];
+% for s = 1 : length( selGrp );
+%   g = selGrp( s );
+%   sampleIdx = ( 1 : nSample )';
+%   [ ~, grpPred ] = max( grpModel{ g }.bayesProb, [], 2 );
+%   scores = scores + full( sparse( sampleIdx, grpPred, 1, nSample, nClass ) );
+% end
 
 [ manuConf, manuAcc ] = ScoreToConf( scores( test, : ), testLab );
 fprintf( 'manu Acc: %.2f %%\n', manuAcc );

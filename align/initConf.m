@@ -21,7 +21,7 @@ global conf imdb;
 conf.lite = false;                        % lite version for debug
 
 conf.dataset = 'CUB11';                  % dataset name
-conf.prefix  = 'bdbox-fv-clr-300';       % name prefix for all output
+conf.prefix  = 'seg-fv-clr-300-bdbox';       % name prefix for all output
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
@@ -35,7 +35,7 @@ if( conf.isStandImg )
 end
 
 conf.useBoundingBox = true;               % enable crop of bounding box
-conf.useSegMask = false;                   % enable segment mask
+conf.useSegMask = true;                   % enable segment mask
 
 %-----------------------------------------------
 % feature&encoder paramters

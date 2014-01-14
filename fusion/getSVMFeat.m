@@ -52,7 +52,9 @@ for f = 1 : conf.nFold
       yTrain = 2 * ( imdb.clsLabel( trainIdx ) == cmpCls ) - 1 ;
       yValid = 2 * ( imdb.clsLabel( validIdx ) == cmpCls ) - 1 ;
       tmpModel = libsvmtrain( double( yTrain ), double( trainK ), ...
-        conf.orgSVMOPT ) ;
+        curGrp.grpSVMOPT );
+        %conf.orgSVMOPT ) ;
+
       % get valid SVM score --> map features
       [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
         double( validK ), tmpModel  );

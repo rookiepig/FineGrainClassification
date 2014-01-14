@@ -17,7 +17,7 @@ end
 %-----------------------------------------------
 % Manual paramters
 %-----------------------------------------------
-conf.prefix   = 'prob-ova';
+conf.prefix   = 'prob-org-bdbox';
 % 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10; 
 conf.MAP_INIT_VAL = -100;
@@ -25,10 +25,10 @@ conf.MAP_INIT_VAL = -100;
 % flag paramters
 %-----------------------------------------------
 conf.isDebug   = true;
-
 % use one-vs-one SVM to get prob output
 conf.isOVOSVM = false;
-
+% all cluster use same SVM model
+conf.isSameSVM = true;
 % use cluster prior to get final test scores
 % to strong! needs to be improved
 conf.useClusterPrior = false; 
@@ -66,12 +66,22 @@ conf.mapNormType ='l2';
 %-----------------------------------------------
 % SVM paramters
 %-----------------------------------------------
+% cluster svm option
 conf.clusterSVMOPT = [ '-c 10 -t 4 -q' ];
+% original svm option
 conf.orgSVMOPT = [ '-c 10 -t 4 -q' ];
+% group svm option
+conf.grpSVMOPT = cell( 1, conf.nGroup );
+for g = 1 : conf.nGroup
+  conf.grpSVMOPT{ g } = sprintf( '-c %f -t 4 -q\n', 10 * conf.nCluster( g ) );
+end
 if( conf.isOVOSVM )
   % one-vs-one SVM --> libsvm prob
   conf.clusterSVMOPT = [ conf.clusterSVMOPT, ' -b 1' ];
   conf.orgSVMOPT = [ conf.orgSVMOPT, ' -b 1' ];
+  for g = 1 : conf.nGroup
+    conf.grpSVMOPT{ g } = [ conf.grpSVMOPT{ g }, ' -b 1' ];
+  end
 end
 
 
@@ -82,7 +92,10 @@ conf.outDir       = 'data/';
 conf.cacheDir     = 'cache/';
 %
 conf.imdbPath     = fullfile( conf.outDir, 'imdb.mat' );
-conf.kernelPath   = fullfile( conf.outDir, 'kernel.mat'  );
+% kernel types:
+%   seg-fv-clr-300-bdbox-kernel
+%   bdbox-fv-clr-300-kernel
+conf.kernelPath   = fullfile( conf.outDir, 'bdbox-fv-clr-300-kernel.mat'  );
 conf.clsSimPath   = fullfile( conf.outDir, [ conf.prefix '-clsSim.mat' ] );
 %
 conf.grpInfoPath  = fullfile( conf.outDir, [ conf.prefix '-grpInfo.mat' ] );

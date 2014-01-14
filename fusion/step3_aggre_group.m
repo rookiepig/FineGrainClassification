@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: step2_aggre_group.m
+% File: step3_aggre_group.m
 % Desc: aggregate each group info and model to one file
 % Author: Zhang Kang
 % Date: 2014/01/03

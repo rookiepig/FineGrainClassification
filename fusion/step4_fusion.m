@@ -1,8 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: step3_fusion.m
+% File: step4_fusion.m
 % Desc: fusion all group models
 % Author: Zhang Kang
-% Date: 2014/01/03
+% Date: 2014/01/13
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 PrintTab();fprintf( 'Run: %s\n', mfilename );
 

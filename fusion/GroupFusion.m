@@ -54,7 +54,7 @@ switch conf.mapType
         ScoreToConf( grpModel{ g }.probFeat( test, : ), testLab );
       % set grpProb for final fusion
       grpProb{ g } = grpModel{ g }.probFeat;
-      PrintTab();fprintf( '\t current acc: %.2f %%\n', grpAcc{ g } );
+      PrintTab();fprintf( '\t current acc: %.2f %%\n', grpAcc( g ) );
     end
   case 'softmax'
     for g = 1 : conf.nGroup
@@ -70,6 +70,7 @@ switch conf.mapType
     PrintTab();fprintf( 'Error: unknown map type: %s\n', conf.mapType );
 end
 % save each group result
+fusion.grpProb = grpProb;
 fusion.grpConf = grpConf;
 fusion.grpAcc  = grpAcc;
 
