@@ -1,7 +1,7 @@
 % combine train and test kernel to one kernel
 
-load( 'imdb.mat' );
-load( 'kernel.mat' );
+%load( 'imdb.mat' );
+% load( 'kernel.mat' );
 
 sampleNum = length( imdb.clsLabel );
 kernel = zeros( sampleNum, sampleNum );
