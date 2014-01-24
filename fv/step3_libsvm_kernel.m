@@ -46,8 +46,7 @@ if( ~exist( conf.kernelPath, 'file' )  ) % kernel file not exist
       % load current job des
       load( conf.tmpDescrsPath{ jobID } );
       rowDes = cat( 2, jobDes{ : } );
-      clear jobDes; % save memory
-
+      
       ttImgNum = numel( imdb.imgName );
       jobSz = floor( ttImgNum / conf.jobNum );
       rowSt = ( jobID - 1 ) * jobSz + 1;
@@ -74,8 +73,6 @@ if( ~exist( conf.kernelPath, 'file' )  ) % kernel file not exist
           end
           colDes = cat( 2, jobDes{ : } );
           clear jobDes; % save memory
-          % jobDes = cat( 2, jobDes{ : } );
-
           % block matrix multiply
           jobKernel( :, colSt : colEd ) = ...
             rowDes' * colDes;

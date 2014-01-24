@@ -1,30 +1,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: segflipSTDog 
-% Desc: segment Stanford Dog dataset
+% File: segflipCUB11
+% Desc: segment CUB 2011 dataset
 % Author: Zhang Kang
-% Date: 2013/12/23
+% Date: 2013/11/30
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear;
-DOG_DIR = '../../in/STDog/';
-load( fullfile( DOG_DIR, 'file_list.mat' ) );
 
+CUB_DIR = '../../in/CUB2011/';
+load( 'boxes.mat' );
+load( 'images.mat' );
 
-imgNum = numel(  file_list );
-dogBdbox = zeros( imgNum, 4 );
-
+imgNum = size( boxes, 1 );
 totalAb = 0;
+
 
 for imgI = 1 : imgNum
   fprintf( 1, 'Img: %d\n', imgI );
-  imgFn = sprintf( '%sImages/%s', DOG_DIR, file_list{ imgI } );
-  anoFn = sprintf( '%sAnnotation/%s', DOG_DIR, annotation_list{ imgI } );
+  imgFn = sprintf( '%simages/%s', CUB_DIR, images{ imgI, 2 } );
   k = strfind( imgFn, '.jpg' );
   maskFn = sprintf( '%s_m.png', imgFn( 1 : k ) );
   flipFn = sprintf( '%s_f.png', imgFn( 1 : k ) );
   flipMaskFn = sprintf( '%s_f_m.png', imgFn( 1 : k ) );
   fprintf( 1, '\n\toriginal mask' );
   img   = imread( imgFn );
-  box = GetDogBdbox( anoFn );
+  box   = boxes( imgI, 2 : 5 );
   [ mask, abCnt ]  = GetAlignMask( img, box );
   % record total abnormal num
   totalAb = totalAb + abCnt;
@@ -47,7 +45,7 @@ end
 % imgSize = zeros( imgNum, 2 );
 % for imgI = 1 : imgNum
 %     fprintf( 1, 'Img: %d\n', imgI );
-%     imgFn = sprintf( '%simages/%s', DOG_DIR, file_list{ imgI } );
+%     imgFn = sprintf( '%simages/%s', CUB_DIR, images{ imgI, 2 } );
 %     img   = imread( imgFn );
 %     wid = size( img, 2 );
 %     hei = size( img, 1 );

@@ -19,5 +19,20 @@ if( nargin == 2 )
   frame = frame( :, ptIdx );
 end
 
-features.frame = frame;
-features.descr = descr;
+
+if( conf.removeZeroSIFT )
+  % kick out zero descriptor
+  absDesc   = sum( abs( descr ) );
+  nonZero   = find( absDesc > 1e-10 );
+  if( ~isempty( nonZero ) )
+    features.frame = frame( :, nonZero );
+    features.descr = descr( :, nonZero );
+  else
+    fprintf( 'Warning: non-zero SIFT equals 0\n' );
+    features.frame = frame;
+    features.descr = descr;
+  end
+else
+  features.frame = frame;
+  features.descr = descr;
+end

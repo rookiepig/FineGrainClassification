@@ -18,35 +18,44 @@ end
 
 global conf imdb;
 
-conf.lite = false;                        % lite version for debug
-
-conf.dataset = 'CUB11';                  % dataset name
-conf.prefix  = 'seg-fv-clr-300-bdbox';       % name prefix for all output
+% lite version for debug
+conf.lite = true;                        
+% dataset name
+conf.dataset = 'STDog';                 
+% name prefix for all output
+conf.prefix  = 'seg-clr-fv-256-300x300-nozero';             
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
-conf.isLRFlip = true;                   % enable left-right flip
-conf.isStandImg = true;                  % standarize max size < 300
+% enable left-right flip
+conf.isLRFlip = true;
+% standarize max pix < 1e5            
+conf.isStandImg = true;                  
+
 % !!! conflict with seg mask !!
 % to handle seg mask
 % use nearest neigbour inter
 if( conf.isStandImg )
+  % conf.maxPixNum = 1e5;
   conf.maxImgSz = 300;
 end
-
-conf.useBoundingBox = true;               % enable crop of bounding box
-conf.useSegMask = true;                   % enable segment mask
+% remove zero value SIFT descriptor
+conf.removeZeroSIFT = false;
+% enable crop of bounding box
+conf.useBoundingBox = true;
+% enable segment mask      
+conf.useSegMask = true;                   
 
 %-----------------------------------------------
 % feature&encoder paramters
 %-----------------------------------------------
 conf.encoderParam = { 'type', 'fv', ...
   'numWords', 256, ...
-  'layouts', {'1x1'}, ...    % spatial pyramid layouts
-  'numPcaDimensions', 64, ...            % PCA dimenssion PCA FLAG
+  'layouts', {'1x1'}, ...                 % spatial pyramid layouts
+  'numPcaDimensions', 64, ...              % PCA dimenssion PCA FLAG
   'whitening', false, ...                  % PCA whiten PCA FLAG
   'whiteningRegul', 0.01, ...              % PCA whiten + regularize
-  'renormalize', true, ...                % PCA l2 renormalize
+  'renormalize', true, ...                 % PCA l2 renormalize
   'seed', 1
   };                                       % encoder paramter
 conf.featDimPerChannel = 128;              % if use multiple channel

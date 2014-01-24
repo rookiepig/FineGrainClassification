@@ -18,10 +18,10 @@ end
 % Manual paramters
 %-----------------------------------------------
 % dataset [CUB11, CUB10, STDog]
-conf.dataset = 'STDog';
+conf.dataset = 'CUB11';
 % PrintTab;fprintf( 'Dataset: %s\n', conf.dataset );
 % approach prefix
-conf.prefix   = 'prob-org-all';
+conf.prefix   = 'prob-clr-fv-512-1x1+3x1';
 % 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10; 
 conf.MAP_INIT_VAL = -100;
@@ -42,7 +42,7 @@ conf.useClusterPrior = false;
 % cluster type: [spectral, tree]
 conf.clusterType = 'spectral';
 % group 1 --> no cluster
-conf.nGroup = 7; % CUB 8 groups; STDog 7 groups;
+conf.nGroup = 8; % CUB 8 groups; STDog 7 groups;
 % each group's cluster number
 conf.nCluster = zeros( conf.nGroup, 1 );
 for nc = 1 : conf.nGroup
@@ -94,13 +94,19 @@ end
 %-----------------------------------------------
 conf.outDir       = [ 'data/', conf.dataset ];
 conf.cacheDir     = [ 'cache/', conf.dataset ];
+conf.kernelDir    = [ '../align/data/', conf.dataset ];
 %
 conf.imdbPath     = fullfile( conf.outDir, 'imdb.mat' );
 % kernel types:
 %   seg-fv-clr-300-bdbox-kernel
 %   bdbox-fv-clr-300-kernel
-conf.kernelPath   = fullfile( conf.outDir, ...
-  'seg-fv-clr-300-bdbox-kernel.mat'  );
+%   clr_fv_256_1x1+3x1-kernel
+%   seg-clr-fv-256-kernel
+%   clr-fv-512-1x1+3x1-kernel
+
+conf.kernelPath   = fullfile( conf.kernelDir, ...
+  'clr-fv-512-1x1+3x1-kernel.mat'  );
+
 conf.clsSimPath   = fullfile( conf.outDir, [ conf.prefix '-clsSim.mat' ] );
 %
 conf.grpInfoPath  = fullfile( conf.outDir, [ conf.prefix '-grpInfo.mat' ] );

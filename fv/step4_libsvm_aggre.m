@@ -39,8 +39,6 @@ else
   kernel = zeros( ttImgNum, ttImgNum );
   jobSz = floor( ttImgNum / conf.jobNum );
   
-  allExist = true;
-
   for jobID = 1 : conf.jobNum
     if( exist( conf.tmpKernelPath{ jobID }, 'file' ) )
       % load job kernel
@@ -57,7 +55,6 @@ else
     else
       fprintf( 2, '\n\t Error: tmp kernel file %s does not exist\n', ...
         conf.tmpKernelPath{ jobID } );
-      allExist = false;
     end
   end
   % get training and testing kernel matrix
@@ -71,11 +68,7 @@ else
   %   kernel( selTest, selTrain ) ];
 
   % save all kernel
-  if( allExist )
-    save( conf.kernelPath, 'kernel', '-v7.3'  );
-  else
-    fprintf( '\n\t Error: kernel incomplete!\n' );
-  end
+  save( conf.kernelPath, 'kernel', '-v7.3'  );
 end
 
 fprintf( '\n ...Done Aggregate Precomputed Kernel time: %.2f (s)',  toc );

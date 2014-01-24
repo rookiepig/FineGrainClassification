@@ -1,4 +1,4 @@
-function [ wSoftmax, proAll ] = MultiLRL2( xTrain, yTrain, xAll )
+function [ wSoftmax, probAll ] = MultiLRL2( xTrain, yTrain, xAll )
 %% MultiLRL2
 %  Desc: Multinomial logistic regression with L2-regularization
 %        **automatically add bias term to xTrain and xAll**
@@ -8,7 +8,7 @@ function [ wSoftmax, proAll ] = MultiLRL2( xTrain, yTrain, xAll )
 %    xAll   -- (nAll * 1) all sample feature
 %  Out:
 %    wSoftmax -- (nVars + 1 * nClass) calculated softmax weights
-%    proAll   -- normalized probability
+%    probAll   -- normalized probability
 %%
 
 PrintTab();fprintf( 'function: %s\n', mfilename );
@@ -45,6 +45,6 @@ PrintTab();fprintf( 'MultiLRL2 train acc %.2f %%\n', trainAcc );
 % get all sample probability
 p = exp( xAll * wSoftmax );
 Z = sum( p, 2 );
-proAll = p ./ repmat( Z, [ 1, nClass ] );
+probAll = p ./ repmat( Z, [ 1, nClass ] );
 
 % end function MultiLRL2

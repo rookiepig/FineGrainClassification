@@ -28,7 +28,6 @@ if( exist( conf.kernelPath, 'file' ) )
   load( conf.kernelPath );
 else
   fprintf( '\n\t Error: kernel matrix file %s does not exist', conf.kernelPath );
-  return;
 end
 
 %% Step 5: training
@@ -63,9 +62,6 @@ for c = 1 : numClasses
     '-c 10 -t 4' ) ;
   [predClass, acc, scores{ c } ] = libsvmpredict( double( y( test ) ), ...
     double( kernelTest ), model{ c } );
-  if( isempty( find( predClass == 1 ) ) )
-    fprintf( '\n\t Warning: no positive prediction\n' );
-  end
   [~,~,info] = vl_pr( y( test ), scores{ c } ) ;
   ap(c) = info.ap ;
   ap11(c) = info.ap_interp_11 ;

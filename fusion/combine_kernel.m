@@ -12,4 +12,4 @@ test  = ( imdb.ttSplit == 0 );
 kernel( train, train ) = kernelTrain;
 kernel( test, train  ) = kernelTest;
 
-save( 'kernel_all.mat', 'kernel', '-v7.3' );
+% save( 'kernel_all.mat', 'kernel', '-v7.3' );

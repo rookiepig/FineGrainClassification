@@ -46,8 +46,8 @@ if( conf.useSegMask )
     end
   end
   % add bounding box as another feature
-  feat{ numel( maskType ) + 1 } = EncodeFeat( encoder, ...
-    encoder.getFeatFunc( img ), imgSz );
+  % feat{ numel( maskType ) + 1 } = EncodeFeat( encoder, ...
+  %   encoder.getFeatFunc( img ), imgSz );
 else
   % no seg mask just bounding box feature
   feat{ 1 } = EncodeFeat( encoder, encoder.getFeatFunc( img ), imgSz );
