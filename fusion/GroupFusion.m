@@ -11,6 +11,7 @@ function fusion = GroupFusion( conf, imdb, grpInfo, grpModel )
 
 PrintTab();fprintf( 'function: %s\n', mfilename );
 
+
 nSample = length( imdb.clsLabel );
 nClass  = max( imdb.clsLabel );
 test = find( imdb.ttSplit == 0 );

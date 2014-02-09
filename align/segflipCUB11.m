@@ -13,7 +13,7 @@ imgNum = size( boxes, 1 );
 totalAb = 0;
 
 
-for imgI = 1 : imgNum
+for imgI = 1 : 1
   fprintf( 1, 'Img: %d\n', imgI );
   imgFn = sprintf( '%simages/%s', CUB_DIR, images{ imgI, 2 } );
   k = strfind( imgFn, '.jpg' );

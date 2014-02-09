@@ -46,6 +46,24 @@ else
   curGrp  = TrainClusterModel( curGrp );
   % set grp svm opt
   curGrp.grpSVMOPT = conf.grpSVMOPT{ grpID };
+
+  % enlarge each cluster
+  PrintTab();fprintf( 'enlarge cluster\n' );
+  load( conf.imdbPath );
+  train = find( imdb.ttSplit == 1 );
+  for t = 1 : length( train )
+    c = curGrp.clsToCluster( train( t ) );
+    if( ~ismember( imdb.clsLabel( train( t ) ), curGrp.cluster{ c } ) )
+      % train label not in this cluster --> enlarge current cluster
+      curGrp.cluster{ c } = [ curGrp.cluster{ c }; imdb.clsLabel( train( t ) ) ];
+    end
+  end % end for each sample
+  
+  % sort each cluster class label
+  PrintTab();fprintf( 'sort each cluster classes (ascending order)\n' );
+  for c = 1 : curGrp.nCluster
+    curGrp.cluster{ c } = sort( curGrp.cluster{ c } );
+  end
   % save curGrp
   save( cacheGrpInfo{ grpID }, 'curGrp' );
 end

@@ -34,9 +34,12 @@ else
       curModel.mapSVM      = mapSVM;
     case 'softmax'
       % bayes combine cluster and class prob
-      probFeat           = TrainMapSoft( conf, imdb, curGrp, svmScore );
-      curModel.probFeat  = probFeat;
-      curModel.bayesProb = BayesCombine( conf, imdb, curGrp, curModel );
+      [ wSoftmax, probFeat ] = TrainMapSoft_all( conf, imdb, curGrp, svmScore );
+      curModel.bayesProb     = probFeat;
+      curModel.wSoftmax      = wSoftmax;
+      % old version
+      % curModel.probFeat  = probFeat;
+      % curModel.bayesProb = BayesCombine( conf, imdb, curGrp, curModel );
     otherwise
       PrintTab();fprintf( '\t Error: unknow map method: %s\n', conf.mapType );
   end

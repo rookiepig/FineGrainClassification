@@ -78,12 +78,13 @@ if DEBUG
     ang , meandCord( 2 ), meandCord( 1 ), 'r' );
 end
 % get head and tail point
+ratio = 3;
 if( e1( 1 ) <= 0 )
-  headPt = meandCord + 2 * e1;
-  tailPt = meandCord - 2 * e1;
+  headPt = meandCord + ratio * e1;
+  tailPt = meandCord - ratio * e1;
 else
-  headPt = meandCord - 2 * e1;
-  tailPt = meandCord + 2 * e1;
+  headPt = meandCord - ratio * e1;
+  tailPt = meandCord + ratio * e1;
 end
 if DEBUG
   % draw head, mean, tail point

@@ -55,7 +55,9 @@ end
 % compute the eigenvectors corresponding to the k smallest
 % eigenvalues
 diff   = eps;
-[U, ~] = eigs(L, k, diff);
+[U, ~] = eigs(L, k, diff);  % manual enlarge eigen vector numbers
+
+% [U, ~] = eigs(L, k, diff);
 
 % in case of the Jordan-Weiss algorithm, we need to normalize
 % the eigenvectors row-wise
@@ -69,6 +71,9 @@ end
 
 % fprintf( 'U size: %d\n', size( U ) );
 % fprintf( 'k: %d\n', k );
+
+rng('shuffle');    % enable randomness
+
 C = kmeans(U, k, 'EmptyAction', 'singleton');
              
 % now convert C to a n-by-k matrix containing the k indicator

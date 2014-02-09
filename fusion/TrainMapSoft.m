@@ -22,6 +22,10 @@ probFeat = zeros( nSample, nClass );
 for t = 1 : nCluster
   PrintTab();fprintf( '\t cluster %d\n', t );
   grpCls = curGrp.cluster{ t };
+
+  % get cluster prior prob
+  clusterProb = curGrp.clusterProb( :, t );
+
   % train feature
   curTrain = intersect( find( ismember( imdb.clsLabel, grpCls ) ), train );
   trainScore = svmScore( curTrain, grpCls );
@@ -33,9 +37,13 @@ for t = 1 : nCluster
   end
   % softmax L2 regression
   allScore = svmScore( :, grpCls );
-  [ ~, proAll ] = MultiLRL2( trainScore, trainLabel, allScore );
+  [ ~, proAll ] = MultiLRL2( trainScore, trainLabel, allScore, 1, ones( length( trainLabel ), 1 ) );
+  % use cluster probability as bias
+  % [ ~, proAll ] = MultiLRL2( trainScore, trainLabel, allScore, 1, clusterProb( curTrain ) );
   % set final probability
-  probFeat( :, grpCls ) = proAll;
+  clusterProb = repmat( clusterProb, [ 1 length( grpCls ) ] );
+  % bayes combine
+  probFeat( :, grpCls ) = probFeat( :, grpCls ) + proAll .* clusterProb;
 end % end for each cluster
 
 PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );

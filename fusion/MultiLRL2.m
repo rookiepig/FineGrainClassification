@@ -1,4 +1,4 @@
-function [ wSoftmax, probAll ] = MultiLRL2( xTrain, yTrain, xAll )
+function [ wSoftmax, probAll ] = MultiLRL2( xTrain, yTrain, xAll, regLambda, bias )
 %% MultiLRL2
 %  Desc: Multinomial logistic regression with L2-regularization
 %        **automatically add bias term to xTrain and xAll**
@@ -18,6 +18,7 @@ nClass = max( yTrain );
 nVars = size( xTrain, 2 );
 % display iteration info
 options.Display = 1;
+% options.MaxIter = 1000;
 
 
 % Add bias
@@ -25,9 +26,10 @@ xTrain = [ ones( nTrain, 1 ) xTrain ];
 xAll = [ ones( size( xAll, 1 ), 1 ) xAll ];
 
 % softmax loss
-funObj = @(W)SoftmaxLoss2( W, xTrain, yTrain, nClass );
+funObj = @(W)WeightSoftmaxLoss2( W, xTrain, yTrain, nClass, bias );    % weighted softmax
+% funObj = @(W)SoftmaxLoss2( W, xTrain, yTrain, nClass );
 % regularization paramters
-lambda = 1 * ones( nVars + 1, nClass - 1 );
+lambda = regLambda * ones( nVars + 1, nClass - 1 );
 lambda( 1 , : ) = 0; % Don't penalize biases
 
 PrintTab();fprintf( 'Training multinomial logistic regression model...\n' );

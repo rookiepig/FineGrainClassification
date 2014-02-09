@@ -24,38 +24,44 @@ end
 if( ~exist( conf.grpInfoPath, 'file' ) )
   PrintTab();fprintf( '\t aggregate grpInfo\n' );
   grpInfo = cell( 1, conf.nGroup );
+  noError = true;
   for g = 1 : conf.nGroup
     if( exist( cacheGrpInfo{ g }, 'file' ) )
       % load caecheGrpInfo
       load( cacheGrpInfo{ g } );
       grpInfo{ g } = curGrp;
     else
-      PrintTab();
-      fprintf( 'Error: can not find file %s\n', cacheGrpInfo{ g } );
+      PrintTab(); fprintf( 'Error: can not find file %s\n', cacheGrpInfo{ g } );
+      noError = false;
     end
   end
-  % save grpInfo
-  PrintTab();fprintf( '\t save grpInfo to %s\n', conf.grpInfoPath );
-  save( conf.grpInfoPath, 'grpInfo' );
+  if( noError )
+    % save grpInfo
+    PrintTab();fprintf( '\t save grpInfo to %s\n', conf.grpInfoPath );
+    save( conf.grpInfoPath, 'grpInfo' );
+  end
 end
 
 % aagregate grpModel
 if( ~exist( conf.grpModelPath, 'file' ) )
   PrintTab();fprintf( '\t aggregate grpModel\n' );
   grpModel = cell( 1, conf.nGroup );
+  noError = true;
   for g = 1 : conf.nGroup
     if( exist( cacheGrpModel{ g }, 'file' ) )
       % load caecheGrpInfo
       load( cacheGrpModel{ g } );
       grpModel{ g } = curModel;
     else
-      PrintTab();
-      fprintf( 'Error: can not find file %s\n', cacheGrpModel{ g } );
+      PrintTab(); fprintf( 'Error: can not find file %s\n', cacheGrpModel{ g } );
+      noError= false;
     end
   end
-  % save grpModel
-  PrintTab();fprintf( '\t save grpModel to %s\n', conf.grpModelPath );
-  save( conf.grpModelPath, 'grpModel' );
+  if( noError )
+    % save grpModel
+    PrintTab();fprintf( '\t save grpModel to %s\n', conf.grpModelPath );
+    save( conf.grpModelPath, 'grpModel' );
+  end
 end
 
 % end script step2_aggre_group

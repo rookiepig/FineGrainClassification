@@ -17,25 +17,26 @@ nClass  = max( imdb.clsLabel );
 scores = zeros( nSample, nClass );
 
 % get training accuracy
-trainAcc = zeros( conf.nGroup, 1 );
-for g = 1 : conf.nGroup
-  [ ~, trainAcc( g ) ] = ScoreToConf( fusion.grpProb{ g }( train, : ), ...
-    trainLab );
-  fprintf( 'Cur grp %d -- train Acc %.2f %%\n', g, trainAcc( g ) );
-end
+% trainAcc = zeros( conf.nGroup, 1 );
+% for g = 1 : conf.nGroup
+%   [ ~, trainAcc( g ) ] = ScoreToConf( fusion.grpProb{ g }( train, : ), ...
+%     trainLab );
+%   fprintf( 'Cur grp %d -- train Acc %.2f %%\n', g, trainAcc( g ) );
+% end
 
-% l2 norm --> weight
-trainWgt = ( trainAcc - min( trainAcc ) ) / ...
-  max( max( trainAcc ) - min( trainAcc ), 1e-12 );
+% % l2 norm --> weight
+% trainWgt = ( trainAcc - min( trainAcc ) ) / ...
+%   max( max( trainAcc ) - min( trainAcc ), 1e-12 );
 
-trainWgt = exp( trainWgt );
+% trainWgt = exp( trainWgt );
 
 % average fuse
-selGrp = [ 1 2 3 4 5 6 7 8 ];
+fprintf( '\n' );
+selGrp = [ 3 5 6  7 ];
 for t = 1 : length( selGrp )
   g = selGrp( t );
   fprintf( 'Cur grp %d -- test Acc %.2f %%\n', g, fusion.grpAcc( g ) );
-  scores = scores + trainWgt( g ) * fusion.grpProb{ g };
+  scores = scores + fusion.grpProb{ g };
 end
 
 % max fuse

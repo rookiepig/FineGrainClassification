@@ -16,11 +16,6 @@ PrintTab();fprintf( 'function: %s\n', mfilename );
 conf = InitConf( );
 % load imdb, kernel
 load( conf.imdbPath );
-PrintTab();fprintf( '\t loading kernel (maybe slow)\n' );
-load( conf.kernelPath );
-
-% get similarity matrix
-clsSim = KernelToSim( kernel, imdb.clsLabel, imdb.ttSplit );
 
 % get oneGrp struct
 oneGrp.nCluster = nCluster;
@@ -31,6 +26,10 @@ PrintTab();fprintf( '\t Cluaster number: %d\n', nCluster );
 switch conf.clusterType
   case 'spectral'
     % Spectral clustering
+    PrintTab();fprintf( '\t loading kernel (maybe slow)\n' );
+    load( conf.kernelPath );
+    % get similarity matrix
+    clsSim = KernelToSim( kernel, imdb.clsLabel, imdb.ttSplit );
     [ C, ~, ~ ] = SpectralClustering( clsSim, nCluster, 3 );
     for  k = 1 : nCluster
       oneGrp.cluster{ k } = find( C == k );
@@ -38,6 +37,13 @@ switch conf.clusterType
   case 'tree'
     % load from phylogeny tree
     PrintTab();fprintf( '\t Load phylogeny tree manually\n' );
+  case 'confusion'
+    % use confusion matrix of training data as clsSim
+    load( 'clsSim.mat' );
+    [ C, ~, ~ ] = SpectralClustering( clsSim, nCluster, 3 );
+    for  k = 1 : nCluster
+      oneGrp.cluster{ k } = find( C == k );
+    end
   otherwise
     PrintTab();
     fprintf( '\t Error: unknow clustering method %s\n', conf.clusterType );

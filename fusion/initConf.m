@@ -21,9 +21,9 @@ end
 conf.dataset = 'CUB11';
 % PrintTab;fprintf( 'Dataset: %s\n', conf.dataset );
 % approach prefix
-conf.prefix   = 'prob-clr-fv-512-1x1+3x1';
+conf.prefix   = 'overlap_all_softmax_vec';
 % 10-fold CV (5-fold is worse than 10-fold)
-conf.nFold  = 10; 
+conf.nFold  = 10;
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
 % flag paramters
@@ -39,14 +39,19 @@ conf.useClusterPrior = false;
 %-----------------------------------------------
 % Clustering paramters
 %-----------------------------------------------
-% cluster type: [spectral, tree]
+% cluster type: [spectral, tree, confusion]
 conf.clusterType = 'spectral';
 % group 1 --> no cluster
 conf.nGroup = 8; % CUB 8 groups; STDog 7 groups;
 % each group's cluster number
 conf.nCluster = zeros( conf.nGroup, 1 );
 for nc = 1 : conf.nGroup
-  conf.nCluster( nc ) = 2 ^ ( nc - 1 );
+  % conf.nCluster( nc ) = 2 ^ ( nc - 1 );
+  if( nc == 1 )
+    conf.nCluster( nc ) = 1;
+  else
+    conf.nCluster( nc ) = ( nc - 1 ) * 10;
+  end
 end
 %-----------------------------------------------
 % Fusion paramters
@@ -105,7 +110,7 @@ conf.imdbPath     = fullfile( conf.outDir, 'imdb.mat' );
 %   clr-fv-512-1x1+3x1-kernel
 
 conf.kernelPath   = fullfile( conf.kernelDir, ...
-  'clr-fv-512-1x1+3x1-kernel.mat'  );
+  'seg-fv-clr-300-bdbox-kernel.mat'  );
 
 conf.clsSimPath   = fullfile( conf.outDir, [ conf.prefix '-clsSim.mat' ] );
 %

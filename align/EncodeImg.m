@@ -26,6 +26,7 @@ feat = { };
 imgSz = size( img );
 
 if( conf.useSegMask )
+
   mask = encoder.readImgFunc( maskFn, curBox );
   maskType = conf.maskType;
   feat = cell( 1, numel( maskType ) + 1 );
@@ -45,9 +46,31 @@ if( conf.useSegMask )
         encoder.getFeatFunc( img ), imgSz );
     end
   end
-  % add bounding box as another feature
-  % feat{ numel( maskType ) + 1 } = EncodeFeat( encoder, ...
+
+  % bounding box as another feature
+  feat{ numel( maskType ) + 1 } = EncodeFeat( encoder, ...
+    encoder.getFeatFunc( img ), imgSz );
+
+  % % only use the whole foreground mask
+  % mask = encoder.readImgFunc( maskFn, curBox );
+  % maskType = conf.maskType;
+
+  % curMask = ( mask > 0 );
+  % feat{ 1 } = EncodeFeat( encoder, ...
+  %   encoder.getFeatFunc( img, curMask ), imgSz );
+  % % plus bdbox feature
+  % feat{ 2 } = EncodeFeat( encoder, ...
   %   encoder.getFeatFunc( img ), imgSz );
+
+  % split foreground bounding box into two parts
+  % mask = encoder.readImgFunc( maskFn, curBox );
+  % maskType = conf.maskType;
+  % curMask = ( mask >= maskType( 1 ) & mask <= maskType( 2 ) );
+  % feat{ 1 } = EncodeFeat( encoder, ...
+  %   encoder.getFeatFunc( img, curMask ), imgSz );
+  % curMask = ( mask >= maskType( 3 ) & mask <= maskType( 4 ) );
+  % feat{ 2 } = EncodeFeat( encoder, ...
+  %   encoder.getFeatFunc( img, curMask ), imgSz );
 else
   % no seg mask just bounding box feature
   feat{ 1 } = EncodeFeat( encoder, encoder.getFeatFunc( img ), imgSz );

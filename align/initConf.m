@@ -19,11 +19,11 @@ end
 global conf imdb;
 
 % lite version for debug
-conf.lite = true;                        
+conf.lite = false;
 % dataset name
-conf.dataset = 'STDog';                 
+conf.dataset = 'CUB11';
 % name prefix for all output
-conf.prefix  = 'seg-clr-fv-256-300x300-nozero';             
+conf.prefix  = 'seg-fv-clr-300-bdbox';             
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
@@ -44,7 +44,7 @@ conf.removeZeroSIFT = false;
 % enable crop of bounding box
 conf.useBoundingBox = true;
 % enable segment mask      
-conf.useSegMask = true;                   
+conf.useSegMask = true;
 
 %-----------------------------------------------
 % feature&encoder paramters

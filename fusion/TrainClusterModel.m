@@ -15,7 +15,7 @@ function [ curGrp ] = TrainClusterModel( curGrp )
 %%
 
 PrintTab();fprintf( 'function: %s\n', mfilename );
-tic;
+tID = tic;
 
 % init basic variables
 conf = InitConf( );
@@ -146,7 +146,7 @@ else
         % softmax regression --> probability
         [ wSoftmax, proAll ] = MultiLRL2( curGrp.clusterScore( train, : ), ...
                                           clusterGtLab( train ), ...
-                                          curGrp.clusterScore );
+                                          curGrp.clusterScore, 1, ones( length( train ), 1 ) );
         curGrp.wSoftmax = wSoftmax;
         curGrp.clusterProb = proAll;
       otherwise
@@ -173,6 +173,6 @@ fprintf( '\t train cluster mA: %.2f %%\n', curGrp.trainAcc );
 PrintTab();
 fprintf( '\t test cluster mA: %.2f %%\n', curGrp.testAcc );
 
-PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
+PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc( tID ) );
 
 % end function TrainClusterModel
