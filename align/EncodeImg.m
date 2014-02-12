@@ -150,8 +150,13 @@ for i = 1:size(encoder.subdivisions,2)
         'NormalizeComponents') ;
   end
   z = z / max(sqrt(sum(z.^2)), 1e-12) ;
+  nanIdx = isnan( z );
+  if( sum( nanIdx ) > 0 )
+    fprintf( '  Warning: NaN FV\n' );
+    z( nanIdx ) = 0;
+  end
   psi{i} = z(:) ;
   
-end % end for
+end % end for each subdivision
 psi = cat(1, psi{:}) ;
 

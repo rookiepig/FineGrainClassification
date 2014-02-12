@@ -20,7 +20,7 @@ if( nargin == 2 )
 end
 
 
-if( conf.removeZeroSIFT )
+if( conf.removeZeroFeat )
   % kick out zero descriptor
   absDesc   = sum( abs( descr ) );
   nonZero   = find( absDesc > 1e-10 );

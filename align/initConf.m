@@ -10,6 +10,7 @@ if ( strcmp( computer(), 'GLNXA64' ) )
   % run vl_setup explicitly on Linux platform
   run( '~/vlfeat/toolbox/vl_setup' );
   addpath( '~/libsvm/matlab/' );
+  addpath( 'cq/' );
 end
 
 % declare global variable
@@ -23,7 +24,7 @@ conf.lite = false;
 % dataset name
 conf.dataset = 'CUB11';
 % name prefix for all output
-conf.prefix  = 'seg-fv-clr-300-bdbox';             
+conf.prefix  = 'seg-cm-clr-300-bdbox';             
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
@@ -39,12 +40,19 @@ if( conf.isStandImg )
   % conf.maxPixNum = 1e5;
   conf.maxImgSz = 300;
 end
-% remove zero value SIFT descriptor
-conf.removeZeroSIFT = false;
+% remove zero value feature --> avoid NaN in FV
+conf.removeZeroFeat = true;
 % enable crop of bounding box
 conf.useBoundingBox = true;
 % enable segment mask      
 conf.useSegMask = true;
+% use color moment
+conf.useColorMoment = true;
+if( conf.useColorMoment )
+  % get cm paramters
+  load_param;
+  conf.cmParam = param;
+end
 
 %-----------------------------------------------
 % feature&encoder paramters
@@ -59,6 +67,9 @@ conf.encoderParam = { 'type', 'fv', ...
   'seed', 1
   };                                       % encoder paramter
 conf.featDimPerChannel = 128;              % if use multiple channel
+if( conf.useColorMoment )
+  conf.featDimPerChannel = 96;              % if use multiple channel
+end
 conf.featParam = { 'Sizes' [ 4 6 8 10 ], ...
   'Step', 3, ...
   'Color', 'opponent', ...

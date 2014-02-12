@@ -1,4 +1,4 @@
-function [ probFeat ] = TrainMapSoft( conf, imdb, curGrp, svmScore )
+function [ wSoftmax, probFeat ] = TrainMapSoft( conf, imdb, curGrp, svmScore )
 %% TrainMapSoft
 %  Desc: softmax regression to map each cluster SVM probFeat to prob
 %  In: 
@@ -37,7 +37,7 @@ for t = 1 : nCluster
   end
   % softmax L2 regression
   allScore = svmScore( :, grpCls );
-  [ ~, proAll ] = MultiLRL2( trainScore, trainLabel, allScore, 1, ones( length( trainLabel ), 1 ) );
+  [ wSoftmax, proAll ] = MultiLRL2( trainScore, trainLabel, allScore, 1, ones( length( trainLabel ), 1 ) );
   % use cluster probability as bias
   % [ ~, proAll ] = MultiLRL2( trainScore, trainLabel, allScore, 1, clusterProb( curTrain ) );
   % set final probability

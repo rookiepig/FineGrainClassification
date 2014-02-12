@@ -21,16 +21,23 @@ end
 conf.dataset = 'CUB11';
 % PrintTab;fprintf( 'Dataset: %s\n', conf.dataset );
 % approach prefix
-conf.prefix   = 'overlap_all_softmax_vec';
+conf.prefix   = 'ten';
 % 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10;
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
 % flag paramters
 %-----------------------------------------------
+conf.isOverlap = false;
+if( conf.isOverlap )
+  conf.prefix = [ conf.prefix, '-overlap' ];
+end
 conf.isDebug   = true;
 % use one-vs-one SVM to get prob output
 conf.isOVOSVM = false;
+if( conf.isOVOSVM )
+  conf.prefix = [ conf.prefix, '-ovo' ];
+end
 % all cluster use same SVM model
 conf.isSameSVM = true;
 % use cluster prior to get final test scores

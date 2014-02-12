@@ -86,6 +86,7 @@ if nargout > 1
   g = cat( 1, g{ : } );
 
   PrintTab(); fprintf( 'compute gradient time -- %.2f (s)\n', toc( tID ) );
+
 end % end if nargout > 1
 
 if nargout > 2
@@ -208,4 +209,3 @@ function [ v, dv, hv ] = VFunc2( x, w, c1, c2 )
   end
 end % end function VFunc
  
-

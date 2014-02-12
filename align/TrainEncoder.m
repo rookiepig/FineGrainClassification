@@ -28,6 +28,9 @@ opts.layouts = {'1x1'} ;
 opts.subdivisions = zeros(4,0) ;
 opts.readImgFunc = @ReadImg;
 opts.getFeatFunc = @GetFeat;
+if( conf.useColorMoment )
+  opts.getFeatFunc = @GetFeat_cm;
+end
 % set paramters use global configuration
 opts = vl_argparse( opts, conf.encoderParam ) ;
 

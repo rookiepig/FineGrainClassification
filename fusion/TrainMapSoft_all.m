@@ -23,28 +23,37 @@ probFeat = zeros( nSample, nClass );
 trainLab = imdb.clsLabel( train );
 clusterProb = curGrp.clusterProb;
 
+w0 = cell( 1, nCluster );
+
 clsToCluster = zeros( nClass, nCluster );
 for t = 1 : nCluster
   PrintTab();fprintf( '  cluster %d\n', t );
   grpCls = curGrp.cluster{ t };
 
+  % combine feature
+  trainScore{ t } = svmScore( train, grpCls );
+  allScore{ t } = svmScore( :, grpCls );
   % set classs to cluster matrix
   clsToCluster( grpCls, t ) = 1;
 
-  % train feature
-  trainScore{ t } = svmScore( train, grpCls );
-  % softmax L2 regression
-  allScore{ t } = svmScore( :, grpCls );
-  
-  % set final probability
-  % clusterProb = repmat( clusterProb, [ 1 length( grpCls ) ] );
-  % bayes combine
-  % probFeat( :, grpCls ) = probFeat( :, grpCls ) + proAll .* clusterProb;
+  % independent feature
+  curTrain = intersect( find( ismember( imdb.clsLabel, grpCls ) ), train );
+  curScore = svmScore( curTrain, grpCls );
+  % map class label sequentially
+  tmpLabel = imdb.clsLabel( curTrain );
+  curLab = zeros( size( tmpLabel ) );
+  for c = 1 : length( grpCls )
+    curLab( tmpLabel == grpCls( c ) ) = c;
+  end
+  % softmax L2 regression get independent weight
+  curAllScore = svmScore( :, grpCls );
+  [ w0{ t }, proAll ] = MultiLRL2( curScore, curLab, ...
+    curAllScore, 1, ones( length( curLab ), 1 ) );
 end % end for each cluster
 
 
 [ wSoftmax, probFeat ] = MultiLRL2_all( trainScore, trainLab, clusterProb( train, : ), ...
-  allScore, clusterProb, clsToCluster, 1 );
+  allScore, clusterProb, clsToCluster, 1, w0 );
 
 PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 

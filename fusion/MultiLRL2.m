@@ -16,24 +16,33 @@ PrintTab();fprintf( 'function: %s\n', mfilename );
 nTrain = size( xTrain, 1 );
 nClass = max( yTrain );
 nVars = size( xTrain, 2 );
-% display iteration info
-options.Display = 1;
-% options.MaxIter = 1000;
 
+% minFunc options
+% options.Method = 'sd';
+options.MaxIter = 1000;
+disp( options );
 
 % Add bias
 xTrain = [ ones( nTrain, 1 ) xTrain ];
 xAll = [ ones( size( xAll, 1 ), 1 ) xAll ];
 
 % softmax loss
-funObj = @(W)WeightSoftmaxLoss2( W, xTrain, yTrain, nClass, bias );    % weighted softmax
-% funObj = @(W)SoftmaxLoss2( W, xTrain, yTrain, nClass );
+% funObj = @(W)WeightSoftmaxLoss2( W, xTrain, yTrain, nClass, bias );    % weighted softmax
+funObj = @(W)SoftmaxLoss2( W, xTrain, yTrain, nClass );
+
+% weight initialization
+tmp     = zeros( nVars + 1, nClass - 1 );
+% set to unit matrix
+tmp( 1, : ) = 0;
+e = eye( nClass );
+tmp( 2 : end, : ) = e( :, 1 : end - 1 );
+w0 = tmp( : );
 % regularization paramters
 lambda = regLambda * ones( nVars + 1, nClass - 1 );
 lambda( 1 , : ) = 0; % Don't penalize biases
 
 PrintTab();fprintf( 'Training multinomial logistic regression model...\n' );
-wSoftmax = minFunc(@penalizedL2,zeros((nVars+1)*(nClass-1),1),options,funObj,lambda(:));
+wSoftmax = minFunc( @penalizedL2, w0, options, funObj, lambda( : ) );
 
 % reshape softmax paramters
 wSoftmax = reshape( wSoftmax, [ nVars + 1 nClass - 1 ] );

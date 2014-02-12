@@ -1,4 +1,5 @@
-function [ wSoftmax, probAll ] = MultiLRL2_all( xTrain, yTrain, trainPrior, xAll,  allPrior,  clsToCluster, regLambda )
+function [ wSoftmax, probAll ] = MultiLRL2_all( xTrain, yTrain, trainPrior, ...
+  xAll,  allPrior,  clsToCluster, regLambda, varargin )
 %% MultiLRL2
 %  Desc: Multinomial logistic regression with L2-regularization
 %        **automatically add bias term to xTrain and xAll**
@@ -14,12 +15,12 @@ function [ wSoftmax, probAll ] = MultiLRL2_all( xTrain, yTrain, trainPrior, xAll
 PrintTab();fprintf( 'function: %s\n', mfilename );
 
 % minFunc options
-% options.Method = 'sd';
-options.MaxIter = 1000;
+% options.Method = 'sd'; % try gradient descent
+options.MaxIter = 500;
 disp( options );
 
+% init cluster related constants
 nCluster = size( clsToCluster, 2 );
-
 for t = 1 : nCluster
   % set each cluster constant variable
   nClass{ t }   = sum( clsToCluster( :, t ) ); 
@@ -30,20 +31,44 @@ for t = 1 : nCluster
   xAll{ t } = [ ones( size( xAll{ t }, 1 ), 1 ) xAll{ t } ];
 end
 
-% softmax loss
-funObj = @(W)SoftmaxLoss2_all( W, xTrain, yTrain, nClass, trainPrior, clsToCluster );    % weighted softmax
-% funObj = @(W)SoftmaxLoss2( W, xTrain, yTrain, nClass );
+% init weight
+if( nargin == 8 )
+  PrintTab(); fprintf( 'Init weight from input\n' );
+  initW = varargin{ 1 };
+  % initial weight and regularization paramters
+  for t = 1 : nCluster
+    tmp = initW{ t }( :, 1 : ( nClass{ t } - 1  ) );
+    w0{ t } = tmp( : );
+  end
+  w0 = cat( 1, w0{ : } );
+else
+  PrintTab(); fprintf( 'Init weight by unit matrix\n' );
+  for t = 1 : nCluster
+    % weight initialization
+    tmp     = zeros( nVars{ t } + 1, nClass{ t } - 1 );
+    % set to unit matrix
+    tmp( 1, : ) = 0;
+    e = eye( nClass{ t } );
+    tmp( 2 : end, : ) = e( :, 1 : end - 1 );
+    w0{ t } = tmp( : );
+  end
+  w0 = cat( 1, w0{ : } );
+end
 
-% initial weight and regularization paramters
-for t = 1 : nCluster
-  w0{ t } = zeros( ( nVars{ t } + 1 ) * ( nClass{ t } - 1 ) , 1 );
+% regularization paramter
+for t = 1 : nCluster  
   lambda{ t } = regLambda * ones( nVars{ t } + 1, nClass{ t } - 1 );
   lambda{ t }( 1 , : ) = 0; % Don't penalize biases
   lambda{ t } = reshape( lambda{ t }, [ ( nVars{ t } + 1 ) * ( nClass{ t } - 1 ), 1 ] );
 end
-w0 = cat( 1, w0{ : } );
 lambda = cat( 1, lambda{ : } );
 
+
+% softmax loss
+funObj = @(W)SoftmaxLoss2_all( W, xTrain, yTrain, nClass, trainPrior, clsToCluster );    % weighted softmax
+% funObj = @(W)SoftmaxLoss2( W, xTrain, yTrain, nClass );
+
+% optimization
 PrintTab();fprintf( 'Training multinomial logistic regression model...\n' );
 wSoftmax = minFunc( @penalizedL2, w0, options, funObj, lambda );
 

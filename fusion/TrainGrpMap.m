@@ -34,7 +34,7 @@ else
       curModel.mapSVM      = mapSVM;
     case 'softmax'
       % bayes combine cluster and class prob
-      [ wSoftmax, probFeat ] = TrainMapSoft_all( conf, imdb, curGrp, svmScore );
+      [ wSoftmax, probFeat ] = TrainMapSoft( conf, imdb, curGrp, svmScore );
       curModel.bayesProb     = probFeat;
       curModel.wSoftmax      = wSoftmax;
       % old version
