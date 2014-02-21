@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% File: step5_libsvm_traintest.m
-% Desc: serial training and testing using precomputed kernel map
+% File: entro_traintest.m
+% Desc: use entropy to remove training data
 % Author: Zhang Kang
 % Date: 2013/12/15
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function step5_libsvm_traintest()
+function entro_traintest()
 
 % Step4: Training and Testing
 tic;
@@ -33,10 +33,20 @@ end
 
 %% Step 5: training
 fprintf( '\n Training and Testing...\n' );
-% train and test (left right flip is not implemented)
+
+% load entropy 
+load( 'entro.mat' ); % --> curEntro
 
 numClasses = numel( imdb.clsName );
 train = find( imdb.ttSplit == 1 );
+entroTrain = [];
+for c = 1 : numClasses
+  % select each class half data
+  curIdx = intersect( find( imdb.clsLabel == c ), train );
+  [ ~, sortIdx ] = sort( curEntro( curIdx ), 'descend' );
+  entroTrain = [ entroTrain; curIdx( sortIdx( 1 : ceil( length( curIdx ) / 2 ) ) ) ];
+end
+
 test = find( imdb.ttSplit == 0 ) ;
 
 scores = cell( 1, numClasses );
@@ -47,53 +57,27 @@ ap11 = zeros( 1, numClasses );
 model = cell( 1, numClasses );
 
 % conver all kernel to train and test kernel
-numTrain = length( train );
-numTest = length( test );
+numTrain = length( entroTrain );
+numTest  = length( test );
 kernelTrain = [ ( 1 : numTrain )', ...
-  kernel( train, train ) ];
+  kernel( entroTrain, entroTrain ) ];
 kernelTest = [ ( 1 : numTest )', ...
-  kernel( test, train ) ];
+  kernel( test, entroTrain ) ];
 clear kernel;
-
-svmOpt = sprintf( '-c 10 -t 4' );
-disp( svmOpt );
 
 for c = 1 : numClasses
   fprintf( '\n\t training class: %s (%.2f %%)\n', ...
     imdb.clsName{ c }, 100 * c / numClasses );
   % one-vs-rest SVM
   y = 2 * ( imdb.clsLabel == c ) - 1 ;
-
-  % wgt libsvm
-  % wgt = ones( size( y( train ) ) );
-  % wgt( y( train ) == 1 ) = 199;
-  % model{ c } = wgtsvmtrain( wgt, double( y( train ) ), double( kernelTrain ), ...
-  %   svmOpt ) ;
-  % % predict on train samples
-  % [ ~, ~, trainScore{ c } ] = wgtsvmpredict( double( y( train ) ), ...
-  %   double( kernelTrain ), model{ c } );
-  % % predict on test samples
-  % [ predClass, acc, scores{ c } ] = wgtsvmpredict( double( y( test ) ), ...
-  %   double( kernelTest ), model{ c } );
-  
-  % enlarge positive sample
-  % pos = repmat( intersect( find( imdb.clsLabel == c ), train ), [ numClasses - 1, 1 ] );
-  % curTrain = [ train; pos ];
-  % kernelTrain = [ ( 1 : length( curTrain ) )', ...
-  %   kernel( curTrain, curTrain ) ];
-  % kernelTest = [ ( 1 : numTest )', ...
-  %   kernel( test, curTrain ) ];
-
-  % norm libsvm
-  model{ c } = libsvmtrain( double( y( train ) ), double( kernelTrain ), ...
-    svmOpt ) ;
+  model{ c } = libsvmtrain( double( y( entroTrain ) ), double( kernelTrain ), ...
+    '-c 10 -t 4' ) ;
   % predict on train samples
-  [ ~, ~, trainScore{ c } ] = libsvmpredict( double( y( train ) ), ...
+  [ ~, ~, trainScore{ c } ] = libsvmpredict( double( y( entroTrain ) ), ...
     double( kernelTrain ), model{ c } );
   % predict on test samples
   [ predClass, acc, scores{ c } ] = libsvmpredict( double( y( test ) ), ...
     double( kernelTest ), model{ c } );
-
   if( isempty( find( predClass == 1 ) ) )
     fprintf( '\n\t Warning: no positive prediction\n' );
   end
@@ -116,7 +100,7 @@ fprintf( '\n Saving results and figures ...\n' );
 % train confusion matrix
 trainScore = cat( 2, trainScore{ : } ) ;
 [ ~, trainPred ] = max(trainScore, [], 2) ;
-trainConf = confusionmat( imdb.clsLabel( train ), trainPred );
+trainConf = confusionmat( imdb.clsLabel( entroTrain ), trainPred );
 for c = 1 : numClasses
   sumC = sum( trainConf( c , : ) );
   trainConf( c, : ) = trainConf( c, : ) / sumC;
@@ -131,7 +115,7 @@ for c = 1 : numClasses
   sumC = sum( confusion( c , : ) );
   confusion( c, : ) = confusion( c, : ) / sumC;
 end
-fprintf( '\n  test acc: %.2f %%\n', 100 * mean( diag( testConf ) ) );
+fprintf( '\n  test acc: %.2f %%\n', 100 * mean( diag( confusion ) ) );
 
 % save result
 save( conf.resultPath, ...

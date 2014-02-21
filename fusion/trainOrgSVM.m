@@ -6,7 +6,8 @@ function [ mapFeat, orgSVM ] =  TrainOrgSVM( conf, imdb, kernel, ...
 %    conf, imdb, kernel -- basic variables
 %    curGrp -- (struct) group clustering information
 %  Out:
-%    mapFeat -- (nSample * nClass) SVM feature with test SVM feat
+%    mapFeat -- (1 * nCluster) cell with 
+%               (nSample * nClass) SVM feature with test SVM feat
 %    orgSVM  -- original SVM model
 %%
 
@@ -59,7 +60,7 @@ for c = 1 : curGrp.nCluster
     [ ~, ~, tmpScore ] = libsvmpredict( double( yTest ), ...
       double( testK ), orgSVM{ cmpCls }  );
 
-    mapFeat( testIdx, cmpCls ) = tmpScore;
+    mapFeat{ c }( testIdx, cmpCls ) = tmpScore;
   end % end for grpCls
 end % end for cluster
 

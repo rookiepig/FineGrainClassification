@@ -10,6 +10,7 @@ if ( strcmp( computer(), 'GLNXA64' ) )
   % run vl_setup explicitly on Linux platform
   run( '~/vlfeat/toolbox/vl_setup' );
   addpath( '~/libsvm/matlab/' );
+  addpath( '~/wgtlibsvm/matlab/' );
   addpath( 'cq/' );
 end
 
@@ -24,7 +25,7 @@ conf.lite = false;
 % dataset name
 conf.dataset = 'CUB11';
 % name prefix for all output
-conf.prefix  = 'seg-cm-clr-300-bdbox';             
+conf.prefix  = 'seg-fv-clr-300-bdbox';             
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
@@ -41,13 +42,13 @@ if( conf.isStandImg )
   conf.maxImgSz = 300;
 end
 % remove zero value feature --> avoid NaN in FV
-conf.removeZeroFeat = true;
+conf.removeZeroFeat = false;
 % enable crop of bounding box
 conf.useBoundingBox = true;
 % enable segment mask      
 conf.useSegMask = true;
 % use color moment
-conf.useColorMoment = true;
+conf.useColorMoment = false;
 if( conf.useColorMoment )
   % get cm paramters
   load_param;

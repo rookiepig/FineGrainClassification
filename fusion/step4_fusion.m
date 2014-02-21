@@ -21,7 +21,7 @@ else
   fusion = GroupFusion( conf, imdb, grpInfo, grpModel );
 
   % save fusion results and configurations
-  save( conf.fusionPath, 'fusion' );
+  save( conf.fusionPath, 'fusion', '-v7.3' );
   save( conf.confPath, 'conf' );
   
   %save confusion matrix to PDF file

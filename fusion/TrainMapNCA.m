@@ -1,13 +1,14 @@
-function [ wSoftmax, bayesProb, probFeat ] = TrainMapSoft( conf, imdb, curGrp, svmScore )
-%% TrainMapSoft
-%  Desc: softmax regression to map each cluster SVM bayesProb to prob
+function [ Anew, bayesProb, probFeat ] = TrainMapNCA( conf, imdb, curGrp, svmScore )
+%% TrainMapNCA
+%  Desc: nca to map each cluster SVM bayesProb to prob
 %  In: 
 %    conf, imdb -- basic variables
 %    curGrp -- (struct) group cluster info
 %    svmScore -- (nSample * nClass) SVM feature with test SVM feat
 %  Out:
-%    wSoftMax -- (1 * nCluster) cell each contain cluster softmax paramters
+%    Anew -- (1 * nCluster) cell each contains cluster transformation matrix A
 %    bayesProb  -- (nSample * nClass) probability output for each cluster
+%    probFeat -- (1 * nCluster) cell each contains cluster probability features
 %%
 
 PrintTab();fprintf( 'function: %s\n', mfilename );
@@ -23,7 +24,7 @@ bayesProb = zeros( nSample, nClass );
 % each cluster inner probability
 probFeat = cell( 1, nCluster );
 % each clluster softmax paramters
-wSoftmax = cell( 1, nCluster );
+Anew = cell( 1, nCluster );
 
 for t = 1 : nCluster
   PrintTab();fprintf( '\t cluster %d\n', t );
@@ -41,9 +42,9 @@ for t = 1 : nCluster
   for c = 1 : length( grpCls )
     trainLabel( tmpLabel == grpCls( c ) ) = c;
   end
-  % softmax L2 regression
+  % nca
   allScore = svmScore{ t }( :, grpCls );
-  [ wSoftmax{ t }, probFeat{ t } ] = MultiLRL2( trainScore, trainLabel, allScore, 1, ones( length( trainLabel ), 1 ) );
+  [ Anew{ t }, probFeat{ t } ] = NCAProb( trainScore, trainLabel, allScore );
   % use cluster probability as bias
   % [ ~, proAll ] = MultiLRL2( trainScore, trainLabel, allScore, 1, clusterProb( curTrain ) );
   % set final probability
@@ -54,4 +55,4 @@ end % end for each cluster
 
 PrintTab();fprintf( 'function: %s -- time: %.2f (s)\n', mfilename, toc );
 
-% end function TrainMapSoft
+% end function TrainMapNCA

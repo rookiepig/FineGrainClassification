@@ -28,31 +28,46 @@ trainK = [ ( 1 : size( trainK, 1 ) )', trainK ];
 testK = [ ( 1 : size( testK, 1 ) )', testK ];
 
 % one-vs-one classifier
-% yTrain = imdb.clsLabel( train );
-% yTest  = imdb.clsLabel( test );
+fprintf( 'one-vs-one SVM\n' );
+yTrain = imdb.clsLabel( train );
+yTest  = imdb.clsLabel( test );
 
-% cParam = [ 300, 1000, 3000, 10000, 30000 ];
+cParam = [ 10 ];
 
-% for p = 1 : length( cParam )
-%   svmOpt = sprintf( '-c %f -t 4 -q', cParam( p ) );
-%   % train
-%   fprintf( 'svm param: %s\n', svmOpt );
-%   tmpModel = libsvmtrain( double( yTrain ), double( trainK ), svmOpt );
-%   % test
-%   [ tmpPred, tmpAcc, tmpDec ] = libsvmpredict( double( yTest ), ...
-%     double( testK ), tmpModel );
-%   % confusion
-%   confusion = confusionmat( yTest, tmpPred );
-%   for c = 1 : nClass
-%     sumC = sum( confusion( c , : ) );
-%     confusion( c, : ) = confusion( c, : ) ./ max( sumC, 1e-12 );
-%   end
-%   meanAcc = 100 * mean(diag(confusion));
-%   fprintf( '\n C = %f -- mean acc: %.2f %%\n', cParam( p ), meanAcc );
-% end % tune C
+for p = 1 : length( cParam )
+  svmOpt = sprintf( '-c %f -t 4 -q', cParam( p ) );
+  % train model
+  fprintf( 'svm param: %s\n', svmOpt );
+  tmpModel = libsvmtrain( double( yTrain ), double( trainK ), svmOpt );
+  % train acc
+  [ tmpPred, tmpAcc, tmpDec ] = libsvmpredict( double( yTrain ), ...
+    double( trainK ), tmpModel );
+  % confusion
+  confusion = confusionmat( yTrain, tmpPred );
+  for c = 1 : nClass
+    sumC = sum( confusion( c , : ) );
+    confusion( c, : ) = confusion( c, : ) ./ max( sumC, 1e-12 );
+  end
+  ovoTrainAcc = 100 * mean(diag(confusion));
+  fprintf( '\n C = %f -- train mean acc: %.2f %%\n', cParam( p ), ovoTrainAcc );
 
+  % test
+  [ tmpPred, tmpAcc, tmpDec ] = libsvmpredict( double( yTest ), ...
+    double( testK ), tmpModel );
+  % confusion
+  confusion = confusionmat( yTest, tmpPred );
+  for c = 1 : nClass
+    sumC = sum( confusion( c , : ) );
+    confusion( c, : ) = confusion( c, : ) ./ max( sumC, 1e-12 );
+  end
+  ovoTestAcc = 100 * mean(diag(confusion));
+  fprintf( '\n C = %f -- test mean acc: %.2f %%\n', cParam( p ), ovoTestAcc );
+end % tune C
+
+fprintf( 'one-vs-one SVM train test time: %.2f (s)\n', toc );
 
 % one-vs-all classifier
+fprintf( 'one-vs-all SVM\n' );
 for c = 1 : nClass
   fprintf( '\n\t training class: %s (%.2f %%)\n', ...
     imdb.clsName{ c }, 100 * c / nClass );
@@ -72,9 +87,6 @@ for c = 1 : nClass
   sumC = sum( confusion( c , : ) );
   confusion( c, : ) = confusion( c, : ) / sumC;
 end
-meanAcc = 100 * mean(diag(confusion));
-fprintf( '\n one-vs-all mean acc: %.2f %%\n', meanAcc );
+ovaTestAcc = 100 * mean(diag(confusion));
+fprintf( '\n one-vs-all mean acc: %.2f %%\n', ovaTestAcc );
 
-fprintf( 'one-vs-one SVM train test time: %.2f (s)\n', toc );
-
-% end function TrainProbSVM

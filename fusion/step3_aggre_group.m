@@ -32,13 +32,13 @@ if( ~exist( conf.grpInfoPath, 'file' ) )
       grpInfo{ g } = curGrp;
     else
       PrintTab(); fprintf( 'Error: can not find file %s\n', cacheGrpInfo{ g } );
-      noError = false;
+    noError = false;
     end
   end
   if( noError )
     % save grpInfo
     PrintTab();fprintf( '\t save grpInfo to %s\n', conf.grpInfoPath );
-    save( conf.grpInfoPath, 'grpInfo' );
+    save( conf.grpInfoPath, 'grpInfo', '-v7.3' );
   end
 end
 
@@ -60,7 +60,7 @@ if( ~exist( conf.grpModelPath, 'file' ) )
   if( noError )
     % save grpModel
     PrintTab();fprintf( '\t save grpModel to %s\n', conf.grpModelPath );
-    save( conf.grpModelPath, 'grpModel' );
+    save( conf.grpModelPath, 'grpModel', '-v7.3' );
   end
 end
 

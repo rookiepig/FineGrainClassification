@@ -5,7 +5,7 @@ function [ mapFeat ] = GetSVMFeat( conf, imdb, kernel, curGrp )
 %    conf, imdb, kernel -- basic variables
 %    curGrp -- (struct) group clustering information
 %  Out:
-%    mapFeat -- (nSample * nClass) mapped SVM feature
+%    mapFeat -- (1 * nCluster) cell with (nSample * nClass) mapped SVM feature
 %%
 
 PrintTab();fprintf( 'function: %s\n', mfilename );
@@ -14,18 +14,22 @@ tic;
 % init basic variables
 nSample = length( imdb.clsLabel );
 nClass  = max( imdb.clsLabel );
+nCluster = curGrp.nCluster;
 
 % split 10 fold CV
 [ cvTrain, cvValid ] = SplitCVFold( conf.nFold, imdb.clsLabel, ...
   imdb.ttSplit );
 
-mapFeat = zeros( nSample, nClass ) + conf.MAP_INIT_VAL;
+mapFeat = cell( 1, nCluster );
+for c = 1 : nCluster
+  mapFeat{ c } = zeros( nSample, nClass ) + conf.MAP_INIT_VAL;
+end
 
 for f = 1 : conf.nFold
-  PrintTab();fprintf( '\t Fold: %d (%.2f %%)\n', f, 100 * f / conf.nFold );
-  for c = 1 : curGrp.nCluster
+  PrintTab();fprintf( '  Fold: %d (%.2f %%)\n', f, 100 * f / conf.nFold );
+  for c = 1 : nCluster
     PrintTab();
-    fprintf( '\t\t Cluster: %d (%.2f %%)\n', c, 100 * c / curGrp.nCluster );
+    fprintf( '    Cluster: %d (%.2f %%)\n', c, 100 * c / nCluster );
     grpCls = curGrp.cluster{ c };
     for gC = 1 : length( grpCls )
       cmpCls = grpCls( gC );
@@ -59,7 +63,7 @@ for f = 1 : conf.nFold
       [ ~, ~, tmpScore ] = libsvmpredict( double( yValid ), ...
         double( validK ), tmpModel  );
 
-      mapFeat( validIdx, cmpCls ) = tmpScore;
+      mapFeat{ c }( validIdx, cmpCls ) = tmpScore;
     end % end for grpCls
     fprintf( '\n' );
   end % end for cluster

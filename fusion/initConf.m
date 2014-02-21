@@ -13,6 +13,7 @@ if ( strcmp( computer(), 'GLNXA64' ) )
   run( '~/vlfeat/toolbox/vl_setup' );
   addpath( '~/libsvm/matlab/' );
   addpath( genpath( '~/minConf/') );
+  addpath( './nca/' );
 end
 %-----------------------------------------------
 % Manual paramters
@@ -21,14 +22,14 @@ end
 conf.dataset = 'CUB11';
 % PrintTab;fprintf( 'Dataset: %s\n', conf.dataset );
 % approach prefix
-conf.prefix   = 'ten';
+conf.prefix   = 'one_grp_re_svm';
 % 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10;
 conf.MAP_INIT_VAL = -100;
 %-----------------------------------------------
 % flag paramters
 %-----------------------------------------------
-conf.isOverlap = false;
+conf.isOverlap = true;
 if( conf.isOverlap )
   conf.prefix = [ conf.prefix, '-overlap' ];
 end
@@ -39,7 +40,7 @@ if( conf.isOVOSVM )
   conf.prefix = [ conf.prefix, '-ovo' ];
 end
 % all cluster use same SVM model
-conf.isSameSVM = true;
+conf.isSameSVM = false;
 % use cluster prior to get final test scores
 % to strong! needs to be improved
 conf.useClusterPrior = false; 
@@ -49,7 +50,7 @@ conf.useClusterPrior = false;
 % cluster type: [spectral, tree, confusion]
 conf.clusterType = 'spectral';
 % group 1 --> no cluster
-conf.nGroup = 8; % CUB 8 groups; STDog 7 groups;
+conf.nGroup = 2; % CUB 8 groups; STDog 7 groups;
 % each group's cluster number
 conf.nCluster = zeros( conf.nGroup, 1 );
 for nc = 1 : conf.nGroup
@@ -58,12 +59,13 @@ for nc = 1 : conf.nGroup
     conf.nCluster( nc ) = 1;
   else
     conf.nCluster( nc ) = ( nc - 1 ) * 10;
+    % conf.nCluster( nc ) = 5 * ( floor( ( nc - 2 ) / 5 ) + 1 );
   end
 end
 %-----------------------------------------------
 % Fusion paramters
 %-----------------------------------------------
-% map method: [svm,reg,softmax]
+% map method: [svm,reg,softmax,nca]
 % to make svm score comparable
 conf.mapType = 'softmax';
 switch conf.mapType
