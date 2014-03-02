@@ -8,11 +8,17 @@ function [ mask, abCnt ] = GetAlignMask( I, box )
 %GETALIGNMASK Summary of this function goes here
 %   Detailed explanation goes here
 
+l0Smotth = true;
 DEBUG  = false;
 BIN_DIR = '..\..\bin\';
 TEMP_IMG  = 'img.png';
 TEMP_MASK = 'mask.png';
 abCnt = 0;
+
+if l0Smotth
+  % l0 smooth from [Xu Li, SIGGRAPHASIA12]
+  I = tsmooth(I,0.015,3);
+end
 
 if DEBUG
   % show image and bounding box
@@ -37,10 +43,11 @@ if( wid == box( 3 ) && hei == box( 4 ) )
   box( 4 ) = box( 4 ) - 10;
 end
 
-EXEXC_STR = sprintf( '%sgrabcut.exe %s %f %f %f %f %s', ...
+% grabcut intialized by bouding box
+EXEXC_STR = sprintf( '%sgrabcut_bdbox.exe %s %f %f %f %f %s', ...
   BIN_DIR, ...
   TEMP_IMG, box( 1 ), box( 2 ), box( 3 ), box( 4 ), TEMP_MASK );
-fprintf( 1, '\tRun GrabCut\n' );
+fprintf( 1, '\tRun Bdbox GrabCut\n' );
 system( EXEXC_STR, '-echo' );
 
 % load segment mask
@@ -52,13 +59,24 @@ end
 
 % get mask pixels
 [ fgY, fgX ] = find( mask > 0 );
-
-if( length( fgY ) <= 10 )
-  % empty fore ground
+FG_RATIO = 0.01;
+if( length( fgY ) <= FG_RATIO * length( mask( : ) ) )
+  % foreground less than 1%
   % set all bounding box pixels to fore ground
-  fprintf( 1, 'Special - No Fore Ground Segment\n' );
+  fprintf( 'Special - Foregound less than %.1f %% (Rerun grabcut)\n', ...
+    FG_RATIO * 100 );
   abCnt = 1;
-  mask( box( 2 ) : box( 2 ) + box( 4 ), box( 1 ) : box( 1 ) + box( 3 ) ) = 128;
+%   mask( box( 2 ) : box( 2 ) + box( 4 ), box( 1 ) : box( 1 ) + box( 3 ) ) = 128;
+%   [ fgY, fgX ] = find( mask > 0 );
+  % grabcut intialized by center circle
+  EXEXC_STR = sprintf( '%sgrabcut_circle.exe %s %f %f %f %f %s', ...
+    BIN_DIR, ...
+    TEMP_IMG, box( 1 ), box( 2 ), box( 3 ), box( 4 ), TEMP_MASK );
+  fprintf( 1, '\tRun Circle GrabCut\n' );
+  system( EXEXC_STR, '-echo' );
+  % load segment mask
+  mask = imread( TEMP_MASK );
+  % get mask pixels
   [ fgY, fgX ] = find( mask > 0 );
 end
 fgCord = [ fgY fgX ];

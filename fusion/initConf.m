@@ -22,7 +22,7 @@ end
 conf.dataset = 'CUB11';
 % PrintTab;fprintf( 'Dataset: %s\n', conf.dataset );
 % approach prefix
-conf.prefix   = 'one_grp_re_svm';
+conf.prefix   = 'prob_kernel';
 % 10-fold CV (5-fold is worse than 10-fold)
 conf.nFold  = 10;
 conf.MAP_INIT_VAL = -100;
