@@ -10,21 +10,22 @@ function newFeat = UpdateFeat( oldFeat, preView, curView )
 %%
 global conf;
 
-nSample      = size( oldFeat, 1 );
+ALL_FEAT_LEN = size( oldFeat, 1 );
+nSample      = size( oldFeat, 2 );
+
 VIEW_NUM     = size( conf.viewType, 1 );
 TYPE_NUM     = size( conf.viewType, 2 );
-ALL_FEAT_LEN = size( oldFeat, 2 );
+
 loc          = zeros( TYPE_NUM, 2 );
 part         = ALL_FEAT_LEN / TYPE_NUM;
 for v = 1 : TYPE_NUM
   loc( v, 1 ) = ( v - 1 ) * part + 1;
   loc( v, 2 ) = v * part;
 end
-
 newFeat = oldFeat;
 
 for n = 1 : nSample
-  preFeat = oldFeat( n, : );
+  preFeat = oldFeat( :, n );
   curFeat = preFeat;
   curType = conf.viewType( curView( n ), : );
   preType = conf.viewType( preView( n ), : );
@@ -33,7 +34,7 @@ for n = 1 : nSample
     curFeat( loc( z, 1 ) : loc( z, 2 ) ) = ...
       preFeat( loc( t, 1 ) : loc( t, 2 ) );
   end
-  newFeat( n, : ) = curFeat;
+  newFeat( :, n ) = curFeat;
 end % end for sample
 
 

@@ -12,7 +12,8 @@ if ( strcmp( computer(), 'GLNXA64' ) )
   addpath( '~/libsvm/matlab/' );
   addpath( '~/liblinear/matlab' );
   addpath( '~/wgtlibsvm/matlab/' );
-  addpath( 'cq/' );
+  % addpath( 'cq/' );
+  addpath( '../common/')
 end
 
 % declare global variable
@@ -28,7 +29,8 @@ conf.dataset = 'CUB11';
 conf.outDir  = [ 'data/'  conf.dataset ];                    % output direcotry and files
 
 % name prefix for all output
-conf.prefix  = 'latent';             
+conf.prefix  = 'latent';
+
 if( conf.lite )
   conf.prefix = [ conf.prefix '-lite' ];
 end
@@ -68,6 +70,8 @@ conf.viewType = [ 1 2 3 4; ...
                   3 2 4 1; ... 
                 ];
 
+conf.latentFOLD = 2;
+conf.oneViewTest = true;
 
 %-----------------------------------------------
 % feature&encoder paramters
@@ -98,6 +102,8 @@ end
 %-----------------------------------------------
 conf.svm.C = 10;
 conf.svm.kernel = 'linear';
+conf.svm.solver = 'sdca' ;
+conf.svm.biasMultiplier = 1 ;
 
 
 conf.randSeed = 1 ;                       % initial random seed
@@ -114,7 +120,8 @@ conf.modelPath = fullfile(conf.outDir, [conf.prefix '-model.mat']);
 conf.resultPath = fullfile(conf.outDir, [conf.prefix '-result.mat']);
 % precompute kernel
 conf.kernelPath = fullfile(conf.outDir, [conf.prefix '-kernel.mat']);
-
+% all feature
+conf.allFeatPath = fullfile( conf.outDir, [conf.prefix, '-allFeat.mat' ] );
 
 fprintf( 1, '\n ... Done\n' );
 
