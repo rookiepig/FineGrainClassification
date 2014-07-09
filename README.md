@@ -4,8 +4,14 @@ A Matlab reimplementation of the ICCV 2013 paper [Fine-Grained Categorization by
 
 ## Explanation of the code structure
 
-* Folder [align](FineGrainClassification/align/) contains all the Matlab codes to run the ICCV 2013 method. Run the following scripts orderly: (1) step1_trainEncoder.m; (2) step2_encoding.m; (3) step3_libsvm_kernel.m; (4) step4_libsvm_aggre.m; (5) step5_libsvm_traintest.m. (The reason for this complexity is that you need to parallelly encode all images)
+* Folder [align](align/) contains all the Matlab codes to run the ICCV 2013 method. Run the following scripts orderly: 
+  1. step1_trainEncoder.m;
+  2. step2_encoding.m;
+  3. step3_libsvm_kernel.m;
+  4. step4_libsvm_aggre.m;
+  5. step5_libsvm_traintest.m. 
+(The reason for this complexity is that I need to parallelly encode all images)
 
-* Folder [bow](FineGrainClassification/align/) is the baseline method using Bag-of-Words features, which is based on the [VLFeat bow examples](http://www.vlfeat.org/applications/caltech-101-code.html).
+* Folder [bow](bow/) is the baseline method using Bag-of-Words features, which is based on the [VLFeat bow examples](http://www.vlfeat.org/applications/caltech-101-code.html).
 
-* Other folders are some personal experiments, e.g. latent SVM in the folder [latent](FineGrainClassification/latent/). You can just ignore them.
+* Other folders are some personal experiments, e.g. latent SVM in the folder [latent](latent/). You can just ignore them.
