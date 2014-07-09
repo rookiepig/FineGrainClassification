@@ -14,4 +14,6 @@ A Matlab reimplementation of the ICCV 2013 paper [Fine-Grained Categorization by
 
 * Folder [bow](bow/) is the baseline method using Bag-of-Words features, which is based on the [VLFeat bow examples](http://www.vlfeat.org/applications/caltech-101-code.html).
 
+* The three used datasets are: [CUB Bird 2010](http://www.vision.caltech.edu/visipedia/CUB-200.html), [CUB Bird 2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) and [Stanford Dog](http://vision.stanford.edu/aditya86/ImageNetDogs/).
+
 * Other folders are some personal experiments, e.g. latent SVM in the folder [latent](latent/). You can just ignore them.
